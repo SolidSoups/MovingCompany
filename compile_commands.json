@@ -1,0 +1,202 @@
+[
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Destruction\\MCO_DebrisActor.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Destruction\\MCO_DestructibleActor.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\MovingCo.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\MovingCoCameraManager.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\MovingCoCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\MovingCoGameMode.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\MovingCoPlayerController.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Horror\\HorrorCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Horror\\HorrorGameMode.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Horror\\HorrorPlayerController.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Horror\\UI\\HorrorUI.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\AI\\EnvQueryContext_Target.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\AI\\ShooterAIController.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\AI\\ShooterNPC.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\AI\\ShooterNPCSpawner.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\AI\\ShooterStateTreeUtility.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\ShooterCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\ShooterGameMode.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\ShooterPlayerController.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\UI\\ShooterBulletCounterUI.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\UI\\ShooterUI.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\Weapons\\ShooterPickup.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\Weapons\\ShooterProjectile.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\Weapons\\ShooterWeapon.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Variant_Shooter\\Weapons\\ShooterWeaponHolder.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	}
+]

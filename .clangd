@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: [/std:c++20, /U_MSVC_TRADITIONAL]
