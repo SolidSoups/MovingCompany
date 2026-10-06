@@ -51,6 +51,9 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Input")
     class UInputAction* CrouchAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    class UInputAction* HoldAction;
 	
 public:
 	AMovingCoCharacter();
@@ -86,6 +89,12 @@ protected:
 
     UFUNCTION(BlueprintCallable, Category="Input")
     void DoEndCrouch();
+
+    UFUNCTION(BlueprintCallable, Category="Input")
+    void DoStartHold();
+
+    UFUNCTION(BlueprintCallable, Category="Input")
+    void DoEndHold();
 
 protected:
 

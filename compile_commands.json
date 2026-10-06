@@ -16,6 +16,14 @@
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
 	},
 	{
+		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\Furniture\\MCO_FurnitureBase.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\.vscode\\compileCommands_MovingCo\\MovingCo.0.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source"
+	},
+	{
 		"file": "C:\\Users\\elima\\Documents\\Unreal Projects\\MovingCo\\Source\\MovingCo\\MovingCo.cpp",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",

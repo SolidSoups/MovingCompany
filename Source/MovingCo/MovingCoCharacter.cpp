@@ -76,6 +76,9 @@ void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		// Looking/Aiming
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMovingCoCharacter::LookInput);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AMovingCoCharacter::LookInput);
+
+		EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Started, this, &AMovingCoCharacter::DoStartHold);
+		EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Completed, this, &AMovingCoCharacter::DoEndHold);
 	}
 	else
 	{
@@ -135,9 +138,14 @@ void AMovingCoCharacter::DoJumpEnd()
 	// pass StopJumping to the character
 	StopJumping();
 }
-void AMovingCoCharacter::DoStartCrouch() {
-    Crouch();
+
+// Crouching
+void AMovingCoCharacter::DoStartCrouch() { Crouch(); }
+void AMovingCoCharacter::DoEndCrouch() { UnCrouch(); }
+
+void AMovingCoCharacter::DoStartHold() {
+
 }
-void AMovingCoCharacter::DoEndCrouch() {
-    UnCrouch();
+void AMovingCoCharacter::DoEndHold() {
+
 }
