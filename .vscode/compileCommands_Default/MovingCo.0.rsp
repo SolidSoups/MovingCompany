@@ -353,6 +353,7 @@
 /I "C:\Users\elima\Documents\Unreal Projects\MovingCo\Intermediate\Build\Win64\UnrealEditor\Inc\MovingCo\UHT" 
 /I "C:\Users\elima\Documents\Unreal Projects\MovingCo\Source\MovingCo" 
 /I "C:\Users\elima\Documents\Unreal Projects\MovingCo\Source\MovingCo\Destruction" 
+/I "C:\Users\elima\Documents\Unreal Projects\MovingCo\Source\MovingCo\Furniture" 
 /I "C:\Users\elima\Documents\Unreal Projects\MovingCo\Source\MovingCo\Variant_Horror" 
 /I "C:\Users\elima\Documents\Unreal Projects\MovingCo\Source\MovingCo\Variant_Horror\UI" 
 /I "C:\Users\elima\Documents\Unreal Projects\MovingCo\Source\MovingCo\Variant_Shooter" 

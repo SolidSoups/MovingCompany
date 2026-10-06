@@ -26,6 +26,7 @@ public class MovingCo : ModuleRules
 		PublicIncludePaths.AddRange(new string[] {
 			"MovingCo",
             "MovingCo/Destruction",
+            "MovingCo/Furniture",
 			"MovingCo/Variant_Horror",
 			"MovingCo/Variant_Horror/UI",
 			"MovingCo/Variant_Shooter",

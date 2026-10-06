@@ -11,6 +11,7 @@ class UInputComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
 class UInputAction;
+class UPhysicsHandleComponent;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -30,6 +31,9 @@ class AMovingCoCharacter : public ACharacter
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
+
+    UPROPERTY(VisibleAnywhere, Category="Components", meta = (AllowPrivateAccess = "true"))
+    UPhysicsHandleComponent* PhysicsHandle;
 
 protected:
 
@@ -59,6 +63,8 @@ public:
 	AMovingCoCharacter();
     virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
     virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+
+    virtual void Tick(float DeltaSeconds) override;
 
 protected:
 
@@ -95,6 +101,20 @@ protected:
 
     UFUNCTION(BlueprintCallable, Category="Input")
     void DoEndHold();
+
+    FVector GetHoldAnchor() const;
+    bool bLifting = false;
+    FVector HoldOffset = FVector::ZeroVector;
+
+    UPROPERTY(EditAnywhere, Category="Hold", meta=(ClampMin="1"))
+    float HalfSpeedMass = 500.f;
+
+    UPROPERTY(EditAnywhere, Category="Hold")
+    float LiftWeightAdd = 100.f;
+
+
+    float HoldSpeedScale = 1.0f;
+    void SetHoldSpeedScale(float Scale);
 
 protected:
 
