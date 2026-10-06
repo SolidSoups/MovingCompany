@@ -42,6 +42,19 @@ AMovingCoCharacter::AMovingCoCharacter()
 	// Configure character movement
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 	GetCharacterMovement()->AirControl = 0.5f;
+    GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+}
+void AMovingCoCharacter::OnStartCrouch(float HalfHeightAdjust,
+                                       float ScaledHalfHeightAdjust) {
+    Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+    FirstPersonMesh->AddRelativeLocation(FVector(0.f, 0.f, -HalfHeightAdjust));
+}
+void AMovingCoCharacter::OnEndCrouch(float HalfHeightAdjust,
+                                     float ScaledHalfHeightAdjust) {
+    Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+    FirstPersonMesh->AddRelativeLocation(FVector(0.f, 0.f, HalfHeightAdjust));
 }
 
 void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -53,6 +66,10 @@ void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMovingCoCharacter::DoJumpStart);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AMovingCoCharacter::DoJumpEnd);
 
+        // Crouching
+        EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AMovingCoCharacter::DoStartCrouch);
+        EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AMovingCoCharacter::DoEndCrouch);
+        
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMovingCoCharacter::MoveInput);
 
@@ -117,4 +134,10 @@ void AMovingCoCharacter::DoJumpEnd()
 {
 	// pass StopJumping to the character
 	StopJumping();
+}
+void AMovingCoCharacter::DoStartCrouch() {
+    Crouch();
+}
+void AMovingCoCharacter::DoEndCrouch() {
+    UnCrouch();
 }

@@ -55,11 +55,11 @@ protected:
 	UPROPERTY(EditAnywhere, Config, Category = "Input|Touch Controls")
 	bool bForceTouchControls = false;
 
-    UPROPERTY(EditAnywhere, Category="Input")
-    UInputAction* PushAction;
-
-    UPROPERTY(EditAnywhere, Category="Input")
-    UInputAction* ResetAction;
+    // UPROPERTY(EditAnywhere, Category="Input")
+    // UInputAction* PushAction;
+    //
+    // UPROPERTY(EditAnywhere, Category="Input")
+    // UInputAction* ResetAction;
 
 	/** Gameplay initialization */
 	virtual void BeginPlay() override;
@@ -70,9 +70,9 @@ protected:
 	/** Returns true if the player should use UMG touch controls */
 	bool ShouldUseTouchControls() const;
 
-    /** Traces from the camera and applies an impact to any destructible it hits */
-    void DoPush();
-
-    /** Reset the destructible actor to the original state */
-    void DoReset();
+    // /** Traces from the camera and applies an impact to any destructible it hits */
+    // void DoPush();
+    //
+    // /** Reset the destructible actor to the original state */
+    // void DoReset();
 };

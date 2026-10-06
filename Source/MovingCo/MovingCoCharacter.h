@@ -48,9 +48,14 @@ protected:
 	/** Mouse Look Input Action */
 	UPROPERTY(EditAnywhere, Category ="Input")
 	class UInputAction* MouseLookAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    class UInputAction* CrouchAction;
 	
 public:
 	AMovingCoCharacter();
+    virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+    virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 protected:
 
@@ -75,6 +80,12 @@ protected:
 	/** Handles jump end inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+
+    UFUNCTION(BlueprintCallable, Category="Input")
+    void DoStartCrouch();
+
+    UFUNCTION(BlueprintCallable, Category="Input")
+    void DoEndCrouch();
 
 protected:
 

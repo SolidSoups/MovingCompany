@@ -20,29 +20,25 @@ AMovingCoPlayerController::AMovingCoPlayerController()
 	PlayerCameraManagerClass = AMovingCoCameraManager::StaticClass();
 }
 
-void AMovingCoPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
+void AMovingCoPlayerController::BeginPlay() {
+  Super::BeginPlay();
 
-	
-	// only spawn touch controls on local player controllers
-	if (IsLocalPlayerController() && ShouldUseTouchControls())
-	{
-		// spawn the mobile controls widget
-		MobileControlsWidget = CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
+  // only spawn touch controls on local player controllers
+  if (IsLocalPlayerController() && ShouldUseTouchControls()) {
+    // spawn the mobile controls widget
+    MobileControlsWidget =
+        CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
 
-		if (MobileControlsWidget)
-		{
-			// add the controls to the player screen
-			MobileControlsWidget->AddToPlayerScreen(0);
+    if (MobileControlsWidget) {
+      // add the controls to the player screen
+      MobileControlsWidget->AddToPlayerScreen(0);
 
-		} else {
+    } else {
 
-			UE_LOG(LogMovingCo, Error, TEXT("Could not spawn mobile controls widget."));
-
-		}
-
-	}
+      UE_LOG(LogMovingCo, Error,
+             TEXT("Could not spawn mobile controls widget."));
+    }
+  }
 }
 
 void AMovingCoPlayerController::SetupInputComponent()
@@ -70,12 +66,12 @@ void AMovingCoPlayerController::SetupInputComponent()
 			}
 
             if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)){
-                EnhancedInputComponent->BindAction(PushAction, ETriggerEvent::Started, this, &AMovingCoPlayerController::DoPush);
-                EnhancedInputComponent->BindAction(ResetAction, ETriggerEvent::Started, this, &AMovingCoPlayerController::DoReset);
+                // Used for the Destructible wall test
+                // EnhancedInputComponent->BindAction(PushAction, ETriggerEvent::Started, this, &AMovingCoPlayerController::DoPush);
+                // EnhancedInputComponent->BindAction(ResetAction, ETriggerEvent::Started, this, &AMovingCoPlayerController::DoReset);
             }
 		}
 	}
-	
 }
 
 bool AMovingCoPlayerController::ShouldUseTouchControls() const
@@ -84,33 +80,35 @@ bool AMovingCoPlayerController::ShouldUseTouchControls() const
 	return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
 }
 
-void AMovingCoPlayerController::DoPush(){
-    FVector ViewLocation;
-    FRotator ViewRotation;
-    GetPlayerViewPoint(ViewLocation, ViewRotation);
+// Prototyping graveyard. 
 
-    const FVector Direction = ViewRotation.Vector();
-    const FVector TraceEnd = ViewLocation + Direction * PushRange;
-
-    // Ignore our own pawn. The camera sits inside its capsule
-    const FCollisionQueryParams Params(SCENE_QUERY_STAT(PushTrace), false, GetPawn());
-
-    FHitResult Hit;
-    bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, ViewLocation, TraceEnd, ECC_Visibility, Params);
-
-    if(bHit){
-        DrawDebugLine(GetWorld(), ViewLocation + FVector(0.0, 0.0, -100.0), Hit.Location, FColor::Green, false, 1.f, 0U, 1.f);
-    }
-    else{
-        return;
-    }
-
-    if(AMCO_DestructibleActor* Structure = Cast<AMCO_DestructibleActor>(Hit.GetActor())){
-        Structure->ApplyRadialImpact(Hit.ImpactPoint, PushRadius, Direction, PushStrength);
-    }
-}
-void AMovingCoPlayerController::DoReset() {
-    for(TActorIterator<AMCO_DestructibleActor> It(GetWorld()); It; ++It){
-        It->Reset();
-    }
-}
+// void AMovingCoPlayerController::DoPush(){
+//     FVector ViewLocation;
+//     FRotator ViewRotation;
+//     GetPlayerViewPoint(ViewLocation, ViewRotation);
+//
+//     const FVector Direction = ViewRotation.Vector();
+//     const FVector TraceEnd = ViewLocation + Direction * PushRange;
+//
+//     // Ignore our own pawn. The camera sits inside its capsule
+//     const FCollisionQueryParams Params(SCENE_QUERY_STAT(PushTrace), false, GetPawn());
+//
+//     FHitResult Hit;
+//     bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, ViewLocation, TraceEnd, ECC_Visibility, Params);
+//
+//     if(bHit){
+//         DrawDebugLine(GetWorld(), ViewLocation + FVector(0.0, 0.0, -100.0), Hit.Location, FColor::Green, false, 1.f, 0U, 1.f);
+//     }
+//     else{
+//         return;
+//     }
+//
+//     if(AMCO_DestructibleActor* Structure = Cast<AMCO_DestructibleActor>(Hit.GetActor())){
+//         Structure->ApplyRadialImpact(Hit.ImpactPoint, PushRadius, Direction, PushStrength);
+//     }
+// }
+// void AMovingCoPlayerController::DoReset() {
+//     for(TActorIterator<AMCO_DestructibleActor> It(GetWorld()); It; ++It){
+//         It->Reset();
+//     }
+// }
