@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputActionValue.h"
 #include "MCO_FurnitureBase.h"
+#include "MCO_StaminaComponent.h"
 #include "MovingCo.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 
@@ -54,6 +55,12 @@ AMovingCoCharacter::AMovingCoCharacter() {
 
   PhysicsHandle =
       CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("Physics Handle"));
+
+  StaminaComponent =
+      CreateDefaultSubobject<UMCO_StaminaComponent>(TEXT("Stamina Component"));
+    StaminaComponent->OnStaminaFullyDrained.AddDynamic(
+        this, &AMovingCoCharacter::HandleStaminaFullyDrained
+    );
 }
 void AMovingCoCharacter::OnStartCrouch(float HalfHeightAdjust,
                                        float ScaledHalfHeightAdjust) {
@@ -77,7 +84,6 @@ void AMovingCoCharacter::Tick(float DeltaSeconds) {
         GetHoldAnchor() + YawRotation.RotateVector(HoldOffset), YawRotation);
   }
 }
-
 
 void AMovingCoCharacter::SetupPlayerInputComponent(
     UInputComponent *PlayerInputComponent) {
@@ -165,54 +171,67 @@ void AMovingCoCharacter::DoJumpEnd() {
 }
 
 // Crouching
-void AMovingCoCharacter::DoStartCrouch() { 
-    Crouch(); 
-}
-void AMovingCoCharacter::DoEndCrouch() { 
-    UnCrouch();
-}
+void AMovingCoCharacter::DoStartCrouch() { Crouch(); }
+void AMovingCoCharacter::DoEndCrouch() { UnCrouch(); }
 
 void AMovingCoCharacter::DoStartHold() {
-    const FVector TraceStart = FirstPersonCameraComponent->GetComponentLocation();
-    const FVector TraceEnd = TraceStart + FirstPersonCameraComponent->GetForwardVector() * 250.f;
+  const FVector TraceStart = FirstPersonCameraComponent->GetComponentLocation();
+  const FVector TraceEnd =
+      TraceStart + FirstPersonCameraComponent->GetForwardVector() * 250.f;
 
-    const FCollisionQueryParams Params(SCENE_QUERY_STAT(HoldTrace), false, this);
+  const FCollisionQueryParams Params(SCENE_QUERY_STAT(HoldTrace), false, this);
 
-    FHitResult Hit;
-    if(!GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params)){
-        return;
-    }
+  FHitResult Hit;
+  if (!GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd,
+                                            ECC_Visibility, Params)) {
+    return;
+  }
 
-    if(!Cast<AMCO_FurnitureBase>(Hit.GetActor()))
-        return;
+  if (!Cast<AMCO_FurnitureBase>(Hit.GetActor()))
+    return;
 
-    bLifting = bIsCrouched;
+  bLifting = bIsCrouched;
 
-    const FRotator YawRotation(0.0f, GetControlRotation().Yaw, 0.0f);
-    HoldOffset = YawRotation.UnrotateVector(Hit.ImpactPoint - GetHoldAnchor());
+  const FRotator YawRotation(0.0f, GetControlRotation().Yaw, 0.0f);
+  HoldOffset = YawRotation.UnrotateVector(Hit.ImpactPoint - GetHoldAnchor());
 
-    PhysicsHandle->GrabComponentAtLocationWithRotation(Hit.GetComponent(), NAME_None, Hit.ImpactPoint, YawRotation);
+  PhysicsHandle->GrabComponentAtLocationWithRotation(
+      Hit.GetComponent(), NAME_None, Hit.ImpactPoint, YawRotation);
 
-    float ComponentWeight = Hit.GetComponent()->GetMass();
-    if(bLifting) ComponentWeight += LiftWeightAdd;
-    SetHoldSpeedScale(HalfSpeedMass / (HalfSpeedMass + ComponentWeight));
+  float ComponentWeight = Hit.GetComponent()->GetMass();
+  if (bLifting)
+    ComponentWeight += LiftWeightAdd;
+  SetHoldSpeedScale(HalfSpeedMass / (HalfSpeedMass + ComponentWeight));
+
+  if (StaminaComponent)
+    StaminaComponent->StartStaminaDrain(bLifting);
 }
 void AMovingCoCharacter::DoEndHold() {
-    PhysicsHandle->ReleaseComponent();
-    SetHoldSpeedScale(1.0f);
+  PhysicsHandle->ReleaseComponent();
+  SetHoldSpeedScale(1.0f);
+
+  if (StaminaComponent)
+    StaminaComponent->EndStaminaDrain();
 }
 
 FVector AMovingCoCharacter::GetHoldAnchor() const {
-    if(bLifting)
-        return GetActorLocation();
+  if (bLifting)
+    return GetActorLocation();
 
-    return GetActorLocation() - FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+  return GetActorLocation() -
+         FVector(0.0f, 0.0f,
+                 GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 }
 
-void AMovingCoCharacter::SetHoldSpeedScale(float Scale){
-    HoldSpeedScale = Scale;
+void AMovingCoCharacter::SetHoldSpeedScale(float Scale) {
+  HoldSpeedScale = Scale;
 
-    const UCharacterMovementComponent* DefaultMovement = GetDefault<AMovingCoCharacter>(GetClass())->GetCharacterMovement();
-    GetCharacterMovement()->MaxWalkSpeed = DefaultMovement->MaxWalkSpeed * Scale;
-    GetCharacterMovement()->MaxWalkSpeedCrouched = DefaultMovement->MaxWalkSpeedCrouched * Scale;
+  const UCharacterMovementComponent *DefaultMovement =
+      GetDefault<AMovingCoCharacter>(GetClass())->GetCharacterMovement();
+  GetCharacterMovement()->MaxWalkSpeed = DefaultMovement->MaxWalkSpeed * Scale;
+  GetCharacterMovement()->MaxWalkSpeedCrouched =
+      DefaultMovement->MaxWalkSpeedCrouched * Scale;
+}
+void AMovingCoCharacter::HandleStaminaFullyDrained() {
+    
 }

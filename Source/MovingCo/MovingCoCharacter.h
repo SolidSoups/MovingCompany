@@ -14,6 +14,8 @@ class UInputAction;
 class UPhysicsHandleComponent;
 struct FInputActionValue;
 
+class UMCO_StaminaComponent;
+
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 /**
@@ -34,6 +36,9 @@ class AMovingCoCharacter : public ACharacter
 
     UPROPERTY(VisibleAnywhere, Category="Components", meta = (AllowPrivateAccess = "true"))
     UPhysicsHandleComponent* PhysicsHandle;
+
+    UPROPERTY(VisibleAnywhere, Category="Components", meta = (AllowPrivateAccess = "true"))
+    UMCO_StaminaComponent* StaminaComponent;
 
 protected:
 
@@ -112,9 +117,10 @@ protected:
     UPROPERTY(EditAnywhere, Category="Hold")
     float LiftWeightAdd = 100.f;
 
-
     float HoldSpeedScale = 1.0f;
     void SetHoldSpeedScale(float Scale);
+
+    void HandleStaminaFullyDrained();
 
 protected:
 

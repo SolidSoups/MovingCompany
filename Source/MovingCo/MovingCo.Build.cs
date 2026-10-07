@@ -27,6 +27,7 @@ public class MovingCo : ModuleRules
 			"MovingCo",
             "MovingCo/Destruction",
             "MovingCo/Furniture",
+            "MovingCo/UI",
 			"MovingCo/Variant_Horror",
 			"MovingCo/Variant_Horror/UI",
 			"MovingCo/Variant_Shooter",
