@@ -12,6 +12,8 @@ class MOVINGCO_API AMCO_FurnitureBase : public AActor
 public:
 	AMCO_FurnitureBase();
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Objective")
+    bool bIsScorable = false;
 protected:
 	virtual void BeginPlay() override;
 
