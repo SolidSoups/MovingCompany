@@ -71,6 +71,7 @@ public:
 
     virtual void Tick(float DeltaSeconds) override;
 
+
 protected:
 
 	/** Called from Input Actions for movement input */
@@ -120,9 +121,18 @@ protected:
     float HoldSpeedScale = 1.0f;
     void SetHoldSpeedScale(float Scale);
 
+    UPROPERTY(EditDefaultsOnly, Category="Stagger")
+    float StaggerDuration = 0.8f;
+
+    UFUNCTION()
     void HandleStaminaFullyDrained();
 
+    bool bStaggered = false;
+    FTimerHandle StaggerTimer;
+    void EndStagger();
+
 protected:
+    virtual void BeginPlay() override;
 
 	/** Set up input action bindings */
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
