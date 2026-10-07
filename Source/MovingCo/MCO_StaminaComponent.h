@@ -15,7 +15,7 @@ public:
 	UMCO_StaminaComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-    void StartStaminaDrain(bool bLifting);
+    void StartStaminaDrain(bool bLifting, float Mass);
     void EndStaminaDrain();
 
     UPROPERTY(BlueprintAssignable, Category="MCO|Stamina")
@@ -39,16 +39,20 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category="MCO|Stamina")
     float LiftingStaminaDrain = 20.f;
 
+    UPROPERTY(EditDefaultsOnly, Category="MCO|Stamina", meta=(ClampMin="1"))
+    float ReferenceMass = 500.0f;
+
     // Per-second
     UPROPERTY(EditDefaultsOnly, Category="MCO|Stamina")
     float StaminaRecoveryPerSecond = 30.f;
+
 
 
 private:
     float CurrentStamina;
 
     bool bDraining = false;
-    bool bLifting = false;
+    float CurrentDrainPerSecond = 0.f;
 
     UPROPERTY()
     TObjectPtr<class UMCO_StaminaUserWidget> StaminaWidget;

@@ -58,11 +58,8 @@ void UMCO_StaminaComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
     if(bDraining){
         const float PreviousStamina = CurrentStamina;
 
-        float DrainPerSecond = bLifting 
-            ? LiftingStaminaDrain 
-            : DraggingStaminaDrain;
         CurrentStamina = FMath::Clamp(
-            CurrentStamina - DrainPerSecond * DeltaTime,
+            CurrentStamina - CurrentDrainPerSecond * DeltaTime,
             0.f, StartingStamina
         );
 
@@ -83,9 +80,12 @@ void UMCO_StaminaComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UMCO_StaminaComponent::EndStaminaDrain() {
     bDraining = false;
-    bLifting = false;
 }
-void UMCO_StaminaComponent::StartStaminaDrain(bool bInLifting) {
+void UMCO_StaminaComponent::StartStaminaDrain(bool bInLifting, float Mass) {
     bDraining = true;
-    bLifting = bInLifting;
+
+    const float BaseDrain = bInLifting
+        ? LiftingStaminaDrain
+        : DraggingStaminaDrain;
+    CurrentDrainPerSecond = BaseDrain * (Mass / ReferenceMass);
 }

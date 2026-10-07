@@ -209,10 +209,11 @@ void AMovingCoCharacter::DoStartHold()
         return;
 
     bLifting = bIsCrouched;
+    const float Mass = Hit.GetComponent()->GetMass();
 
     // Start draining stamina
     if (StaminaComponent)
-        StaminaComponent->StartStaminaDrain(bLifting);
+        StaminaComponent->StartStaminaDrain(bLifting, Mass);
 
     // Grab furniture with physics handle
     const FRotator YawRotation(0.0f, GetControlRotation().Yaw, 0.0f);
@@ -225,7 +226,7 @@ void AMovingCoCharacter::DoStartHold()
     );
 
     // Adjust speed by mass of furniture
-    float SpeedScale = HalfSpeedMass / (HalfSpeedMass + Hit.GetComponent()->GetMass());
+    float SpeedScale = HalfSpeedMass / (HalfSpeedMass + Mass);
     if(!bLifting)
         SpeedScale *= DragSpeedMultiplier;
     SetHoldSpeedScale(SpeedScale);
