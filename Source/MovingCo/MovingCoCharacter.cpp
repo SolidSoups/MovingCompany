@@ -165,6 +165,9 @@ void AMovingCoCharacter::DoMove(float Right, float Forward)
 
 void AMovingCoCharacter::DoJumpStart()
 {
+    if(bHolding)
+        return;
+
     // pass Jump to the character
     Jump();
 }
@@ -214,13 +217,20 @@ void AMovingCoCharacter::DoStartHold()
     // Grab furniture with physics handle
     const FRotator YawRotation(0.0f, GetControlRotation().Yaw, 0.0f);
     HoldOffset = YawRotation.UnrotateVector(Hit.ImpactPoint - GetHoldAnchor());
-    PhysicsHandle->GrabComponentAtLocationWithRotation(Hit.GetComponent(), NAME_None, Hit.ImpactPoint, YawRotation);
+    PhysicsHandle->GrabComponentAtLocationWithRotation(
+        Hit.GetComponent(),
+        NAME_None,
+        Hit.ImpactPoint,
+        YawRotation
+    );
 
     // Adjust speed by mass of furniture
-    float ComponentWeight = Hit.GetComponent()->GetMass();
-    if (bLifting)
-        ComponentWeight += LiftWeightAdd;
-    SetHoldSpeedScale(HalfSpeedMass / (HalfSpeedMass + ComponentWeight));
+    float SpeedScale = HalfSpeedMass / (HalfSpeedMass + Hit.GetComponent()->GetMass());
+    if(!bLifting)
+        SpeedScale *= DragSpeedMultiplier;
+    SetHoldSpeedScale(SpeedScale);
+
+    bHolding = true;
 }
 void AMovingCoCharacter::DoEndHold()
 {
@@ -229,6 +239,8 @@ void AMovingCoCharacter::DoEndHold()
 
     if (StaminaComponent)
         StaminaComponent->EndStaminaDrain();
+
+    bHolding = false;
 }
 
 FVector AMovingCoCharacter::GetHoldAnchor() const

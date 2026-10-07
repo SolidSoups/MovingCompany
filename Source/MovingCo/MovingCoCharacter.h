@@ -110,13 +110,14 @@ protected:
 
     FVector GetHoldAnchor() const;
     bool bLifting = false;
+    bool bHolding = false;
     FVector HoldOffset = FVector::ZeroVector;
 
     UPROPERTY(EditAnywhere, Category="Hold", meta=(ClampMin="1"))
     float HalfSpeedMass = 500.f;
 
-    UPROPERTY(EditAnywhere, Category="Hold")
-    float LiftWeightAdd = 100.f;
+    UPROPERTY(EditAnywhere, Category="Hold", meta=(ClampMin="0.1", ClampMax="1"))
+    float DragSpeedMultiplier = 0.6f;
 
     float HoldSpeedScale = 1.0f;
     void SetHoldSpeedScale(float Scale);
