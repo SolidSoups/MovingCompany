@@ -23,18 +23,7 @@ public class MovingCo : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
-		PublicIncludePaths.AddRange(new string[] {
-			"MovingCo",
-            "MovingCo/Destruction",
-            "MovingCo/Furniture",
-            "MovingCo/UI",
-			"MovingCo/Variant_Horror",
-			"MovingCo/Variant_Horror/UI",
-			"MovingCo/Variant_Shooter",
-			"MovingCo/Variant_Shooter/AI",
-			"MovingCo/Variant_Shooter/UI",
-			"MovingCo/Variant_Shooter/Weapons"
-		});
+		PublicIncludePaths.Add("MovingCo");
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
