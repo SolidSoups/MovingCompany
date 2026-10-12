@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "MovingCoPlayerController.generated.h"
 
+class AMCO_HUDBase;
 class UInputMappingContext;
 class UUserWidget;
 class UInputAction;
@@ -47,6 +48,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input|Touch Controls")
 	TSubclassOf<UUserWidget> MobileControlsWidgetClass;
 
+	UPROPERTY(BlueprintReadOnly, Category="HUD")
+	TObjectPtr<AMCO_HUDBase> HUDBase;
+	
 	/** Pointer to the mobile controls widget */
 	UPROPERTY()
 	TObjectPtr<UUserWidget> MobileControlsWidget;
