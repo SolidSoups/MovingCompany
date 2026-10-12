@@ -36,8 +36,9 @@
 *.app
 
 ### UnrealEngine ###
-# Visual Studio 2015 user specific files
+# Visual Studio / Rider user specific files
 .vs/
+.idea/
 
 # Compiled Object files
 
@@ -56,6 +57,7 @@
 *.xcodeproj
 *.xcworkspace
 *.sln
+*.slnx
 *.suo
 *.opensdf
 *.sdf
@@ -111,3 +113,4 @@ Plugins/**/Binaries/*
 Plugins/**/Intermediate/*
 
 # End of https://www.toptal.com/developers/gitignore/api/unrealengine,c++
+.vscode
