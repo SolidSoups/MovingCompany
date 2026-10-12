@@ -23,7 +23,10 @@ public class MovingCo : ModuleRules
 			"CommonInput"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] {
+            "OnlineSubsystem",
+            "OnlineSubsystemUtils"
+        });
 
 		PublicIncludePaths.Add("MovingCo");
 

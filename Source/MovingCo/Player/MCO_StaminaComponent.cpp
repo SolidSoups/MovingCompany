@@ -49,6 +49,7 @@ void UMCO_StaminaComponent::EndPlay(EEndPlayReason::Type Reason) {
         StaminaWidget->RemoveFromParent();
         StaminaWidget = nullptr;
     }
+    Super::EndPlay(Reason);
 }
 
 void UMCO_StaminaComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

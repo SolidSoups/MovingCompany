@@ -13,6 +13,8 @@
 #include "MovingCo.h"
 #include "EngineUtils.h"
 #include "Widgets/Input/SVirtualJoystick.h"
+#include "Networking/MCO_SessionSubsystem.h"
+#include "Engine/GameInstance.h"
 
 AMovingCoPlayerController::AMovingCoPlayerController()
 {
@@ -78,6 +80,16 @@ bool AMovingCoPlayerController::ShouldUseTouchControls() const
 {
 	// are we on a mobile platform? Should we force touch?
 	return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
+}
+
+void AMovingCoPlayerController::HostGame()
+{
+	GetGameInstance()->GetSubsystem<UMCO_SessionSubsystem>()->HostSession();
+}
+
+void AMovingCoPlayerController::JoinGame()
+{
+	GetGameInstance()->GetSubsystem<UMCO_SessionSubsystem>()->FindAndJoinSession();
 }
 
 // Prototyping graveyard. 
