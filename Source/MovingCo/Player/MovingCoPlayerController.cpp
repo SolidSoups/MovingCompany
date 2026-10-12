@@ -12,6 +12,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MovingCo.h"
 #include "EngineUtils.h"
+#include "UI/MCO_HUDBase.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 #include "Networking/MCO_SessionSubsystem.h"
 #include "Engine/GameInstance.h"
@@ -24,6 +25,16 @@ AMovingCoPlayerController::AMovingCoPlayerController()
 
 void AMovingCoPlayerController::BeginPlay() {
   Super::BeginPlay();
+	
+	HUDBase = Cast<AMCO_HUDBase>(MyHUD);
+	if (IsValid(HUDBase))
+	{
+		HUDBase->Initialize();
+	}
+	else
+	{
+		UE_LOG(LogMovingCo, Error, TEXT("Cast to HUDBase failed!"));
+	}
 
   // only spawn touch controls on local player controllers
   if (IsLocalPlayerController() && ShouldUseTouchControls()) {

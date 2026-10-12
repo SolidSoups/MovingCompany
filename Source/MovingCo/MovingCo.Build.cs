@@ -19,6 +19,7 @@ public class MovingCo : ModuleRules
 			"GameplayStateTreeModule",
 			"UMG",
 			"Slate",
+			"GameplayTags",
 			"CommonUI",
 			"CommonInput"
 		});
