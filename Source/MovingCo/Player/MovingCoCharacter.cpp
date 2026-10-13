@@ -7,12 +7,13 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
+#include "Furniture/MCO_FurnitureBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputActionValue.h"
-#include "Furniture/MCO_FurnitureBase.h"
 #include "MCO_StaminaComponent.h"
 #include "MovingCo.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AMovingCoCharacter::AMovingCoCharacter()
 {
@@ -49,11 +50,16 @@ AMovingCoCharacter::AMovingCoCharacter()
     GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
     GetCharacterMovement()->AirControl = 0.5f;
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
-    GetCharacterMovement()->bEnablePhysicsInteraction = HasAuthority();
 
     PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("Physics Handle"));
 
     StaminaComponent = CreateDefaultSubobject<UMCO_StaminaComponent>(TEXT("Stamina Component"));
+}
+void AMovingCoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AMovingCoCharacter, HoldSpeedScale);
+    DOREPLIFETIME(AMovingCoCharacter, bHolding);
 }
 void AMovingCoCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
 {
@@ -85,6 +91,7 @@ void AMovingCoCharacter::BeginPlay()
     Super::BeginPlay();
 
     StaminaComponent->OnStaminaFullyDrained.AddDynamic(this, &AMovingCoCharacter::HandleStaminaFullyDrained);
+    GetCharacterMovement()->bEnablePhysicsInteraction = HasAuthority();
 }
 
 void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -110,16 +117,14 @@ void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
         EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this,
                                            &AMovingCoCharacter::LookInput);
 
-        EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Started, this, &AMovingCoCharacter::DoStartHold);
-        EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Completed, this, &AMovingCoCharacter::DoEndHold);
+        // SetupPlayerInputComponent is only called on the local client, so this will ONLY ever resolve into an RPC
+        EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Started, this, &AMovingCoCharacter::Server_StartHolding);
+        EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Completed, this, &AMovingCoCharacter::Server_StopHolding);
     }
     else
     {
-        UE_LOG(LogMovingCo, Error,
-               TEXT("'%s' Failed to find an Enhanced Input Component! This template "
-                    "is built to use the Enhanced Input system. If you intend to use "
-                    "the legacy system, then you will need to update this C++ file."),
-               *GetNameSafe(this));
+        UE_LOG(LogMovingCo, Error, TEXT("'%s' Failed to find an Enhanced Input Component!"), *GetNameSafe(this));
+        return;
     }
 }
 
@@ -166,7 +171,7 @@ void AMovingCoCharacter::DoMove(float Right, float Forward)
 
 void AMovingCoCharacter::DoJumpStart()
 {
-    if(bHolding)
+    if (bHolding)
         return;
 
     // pass Jump to the character
@@ -189,14 +194,14 @@ void AMovingCoCharacter::DoEndCrouch()
     UnCrouch();
 }
 
-void AMovingCoCharacter::DoStartHold()
+void AMovingCoCharacter::Server_StartHolding_Implementation()
 {
-    if(bStaggered)
+    if (bStaggered)
         return;
 
     // Trace to see if there is furniture in front of us
-    const FVector TraceStart = FirstPersonCameraComponent->GetComponentLocation();
-    const FVector TraceEnd = TraceStart + FirstPersonCameraComponent->GetForwardVector() * 250.f;
+    const FVector TraceStart = GetPawnViewLocation();
+    const FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 250.f;
 
     const FCollisionQueryParams Params(SCENE_QUERY_STAT(HoldTrace), false, this);
 
@@ -219,22 +224,18 @@ void AMovingCoCharacter::DoStartHold()
     // Grab furniture with physics handle
     const FRotator YawRotation(0.0f, GetControlRotation().Yaw, 0.0f);
     HoldOffset = YawRotation.UnrotateVector(Hit.ImpactPoint - GetHoldAnchor());
-    PhysicsHandle->GrabComponentAtLocationWithRotation(
-        Hit.GetComponent(),
-        NAME_None,
-        Hit.ImpactPoint,
-        YawRotation
-    );
+    PhysicsHandle->GrabComponentAtLocationWithRotation(Hit.GetComponent(), NAME_None, Hit.ImpactPoint, YawRotation);
 
     // Adjust speed by mass of furniture
     float SpeedScale = HalfSpeedMass / (HalfSpeedMass + Mass);
-    if(!bLifting)
+    if (!bLifting)
         SpeedScale *= DragSpeedMultiplier;
     SetHoldSpeedScale(SpeedScale);
 
     bHolding = true;
 }
-void AMovingCoCharacter::DoEndHold()
+
+void AMovingCoCharacter::Server_StopHolding_Implementation()
 {
     PhysicsHandle->ReleaseComponent();
     SetHoldSpeedScale(1.0f);
@@ -266,23 +267,22 @@ void AMovingCoCharacter::HandleStaminaFullyDrained()
 {
     UPrimitiveComponent* Dropped = PhysicsHandle->GetGrabbedComponent();
 
-    DoEndHold();
+    Server_StopHolding();
 
-    if(Dropped){
-        const FVector Fumble = 
-            GetActorForwardVector() * 150.f + FVector(0.f, 0.f, -300.f);
+    if (Dropped)
+    {
+        const FVector Fumble = GetActorForwardVector() * 150.f + FVector(0.f, 0.f, -300.f);
         Dropped->AddImpulse(Fumble, NAME_None, true);
-        Dropped->AddAngularImpulseInDegrees(FMath::VRand() * 180.f, NAME_None,
-                                            true);
+        Dropped->AddAngularImpulseInDegrees(FMath::VRand() * 180.f, NAME_None, true);
     }
 
     GetCharacterMovement()->StopMovementImmediately();
 
     bStaggered = true;
-    GetWorldTimerManager().SetTimer(StaggerTimer, this, 
-                                    &AMovingCoCharacter::EndStagger, StaggerDuration);
+    GetWorldTimerManager().SetTimer(StaggerTimer, this, &AMovingCoCharacter::EndStagger, StaggerDuration);
 }
 
-void AMovingCoCharacter::EndStagger(){
+void AMovingCoCharacter::EndStagger()
+{
     bStaggered = false;
 }

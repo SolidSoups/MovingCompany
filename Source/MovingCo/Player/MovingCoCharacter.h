@@ -66,6 +66,7 @@ protected:
 	
 public:
 	AMovingCoCharacter();
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
     virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
@@ -102,15 +103,14 @@ protected:
     UFUNCTION(BlueprintCallable, Category="Input")
     void DoEndCrouch();
 
-    UFUNCTION(BlueprintCallable, Category="Input")
-    void DoStartHold();
+    UFUNCTION(Server, Reliable)
+    void Server_StartHolding();
 
-    UFUNCTION(BlueprintCallable, Category="Input")
-    void DoEndHold();
+    UFUNCTION(Server, Reliable)
+    void Server_StopHolding();
 
     FVector GetHoldAnchor() const;
     bool bLifting = false;
-    bool bHolding = false;
     FVector HoldOffset = FVector::ZeroVector;
 
     UPROPERTY(EditAnywhere, Category="Hold", meta=(ClampMin="1"))
@@ -119,7 +119,12 @@ protected:
     UPROPERTY(EditAnywhere, Category="Hold", meta=(ClampMin="0.1", ClampMax="1"))
     float DragSpeedMultiplier = 0.6f;
 
+    UPROPERTY(ReplicatedUsing=OnRep_HoldSpeedScale) 
     float HoldSpeedScale = 1.0f;
+
+    UPROPERTY(Replicated) 
+    bool bHolding = false;
+
     void SetHoldSpeedScale(float Scale);
 
     UPROPERTY(EditDefaultsOnly, Category="Stagger")
@@ -147,5 +152,11 @@ public:
 	/** Returns first person camera component **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+
+private:
+    UFUNCTION()
+    void OnRep_HoldSpeedScale() {
+        SetHoldSpeedScale(HoldSpeedScale);
+    }
 };
 
