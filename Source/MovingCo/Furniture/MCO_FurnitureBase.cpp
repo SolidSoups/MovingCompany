@@ -5,6 +5,8 @@
 AMCO_FurnitureBase::AMCO_FurnitureBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+    bReplicates = true;
+    SetReplicateMovement(true);
 
     Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
     Mesh->SetMobility(EComponentMobility::Movable);
@@ -17,6 +19,7 @@ AMCO_FurnitureBase::AMCO_FurnitureBase()
 void AMCO_FurnitureBase::BeginPlay()
 {
 	Super::BeginPlay();
+    SetPhysicsReplicationMode(EPhysicsReplicationMode::PredictiveInterpolation);
 }
 
 void AMCO_FurnitureBase::Tick(float DeltaTime)
