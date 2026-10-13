@@ -11,7 +11,7 @@ AMCO_FurnitureBase::AMCO_FurnitureBase()
     Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
     Mesh->SetMobility(EComponentMobility::Movable);
     Mesh->SetCollisionProfileName(FName("PhysicsActor"));
-    Mesh->SetSimulatePhysics(true);
+    // Mesh->SetIsReplicated(true);
     Mesh->BodyInstance.SetMassOverride(500.0f);
     RootComponent = Mesh;
 }
@@ -20,6 +20,7 @@ void AMCO_FurnitureBase::BeginPlay()
 {
 	Super::BeginPlay();
     SetPhysicsReplicationMode(EPhysicsReplicationMode::PredictiveInterpolation);
+    Mesh->SetSimulatePhysics(HasAuthority());
 }
 
 void AMCO_FurnitureBase::Tick(float DeltaTime)
