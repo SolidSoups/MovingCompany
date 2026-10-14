@@ -46,6 +46,7 @@ UCommonActivatableWidget* UMCO_WidgetStackManager::PushWidgetToLayerStack(FGamep
 	{
 		return Pair.LayerTag == LayerTag;
 	});
+	
 	if (Layer == nullptr)
 	{
 		return nullptr;
@@ -60,6 +61,7 @@ void UMCO_WidgetStackManager::PopWidgetFromLayerStack(FGameplayTag LayerTag)
 	{
 		return Pair.LayerTag == LayerTag;
 	});
+	
 	if (Layer == nullptr)
 	{
 		return;

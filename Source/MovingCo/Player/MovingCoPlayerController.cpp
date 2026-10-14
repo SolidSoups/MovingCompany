@@ -12,7 +12,10 @@
 #include "Blueprint/UserWidget.h"
 #include "MovingCo.h"
 #include "EngineUtils.h"
+#include "MCO_MainMenuGameMode.h"
+#include "Subsystems/MCO_GameplayTagSubsystem.h"
 #include "UI/MCO_HUDBase.h"
+#include "UI/Menus/MainMenu/MCO_MainMenuWidget.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
 AMovingCoPlayerController::AMovingCoPlayerController()
@@ -24,32 +27,48 @@ AMovingCoPlayerController::AMovingCoPlayerController()
 void AMovingCoPlayerController::BeginPlay() {
   Super::BeginPlay();
 	
-	HUDBase = Cast<AMCO_HUDBase>(MyHUD);
-	if (IsValid(HUDBase))
+	if (IsLocalController())
 	{
-		HUDBase->Initialize();
+		HUDBase = Cast<AMCO_HUDBase>(MyHUD); 
+		if (IsValid(HUDBase))
+		{
+			HUDBase->Initialize();
+		}
+		else
+		{
+			UE_LOG(LogMovingCo, Error, TEXT("Cast to HUDBase failed!"));
+		}
+		
+		auto World = GetWorld();
+		if (!IsValid(World)) return;
+		
+		// Check if current game mode is main menu and push widget
+		if (IsValid(World->GetAuthGameMode()); World->GetAuthGameMode()->IsA<AMCO_MainMenuGameMode>())
+		{
+			if (IsValid(HUDBase))
+			{
+				HUDBase->PushWidgetToLayerStack(UMCO_GameplayTagSubsystem::Tags.UILayerTag_Menu, MainMenuWidgetClass);
+				return;
+			}
+		}
+		
+		// only spawn touch controls on local player controllers
+		if (ShouldUseTouchControls()) 
+		{
+			// spawn the mobile controls widget
+			MobileControlsWidget = CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
+
+			if (MobileControlsWidget) 
+			{
+				// add the controls to the player screen
+				MobileControlsWidget->AddToPlayerScreen(0);
+			} 
+			else 
+			{
+				UE_LOG(LogMovingCo, Error, TEXT("Could not spawn mobile controls widget."));
+			}
+		}
 	}
-	else
-	{
-		UE_LOG(LogMovingCo, Error, TEXT("Cast to HUDBase failed!"));
-	}
-
-  // only spawn touch controls on local player controllers
-  if (IsLocalPlayerController() && ShouldUseTouchControls()) {
-    // spawn the mobile controls widget
-    MobileControlsWidget =
-        CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
-
-    if (MobileControlsWidget) {
-      // add the controls to the player screen
-      MobileControlsWidget->AddToPlayerScreen(0);
-
-    } else {
-
-      UE_LOG(LogMovingCo, Error,
-             TEXT("Could not spawn mobile controls widget."));
-    }
-  }
 }
 
 void AMovingCoPlayerController::SetupInputComponent()
