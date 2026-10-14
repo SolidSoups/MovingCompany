@@ -27,6 +27,14 @@ public:
 	/** Constructor */
 	AMovingCoPlayerController();
 
+	/** Console command: create a Steam lobby and open the test map as a listen server */
+	UFUNCTION(Exec)
+	void HostGame();
+
+	/** Console command: find the first MovingCo lobby and join it */
+	UFUNCTION(Exec)
+	void JoinGame();
+
 protected:
     UPROPERTY(EditAnywhere, Category="Push")
     float PushRange = 5000.0f;
