@@ -39,6 +39,7 @@
 # Visual Studio / Rider user specific files
 .vs/
 .idea/
+.sln.DotSettings.user
 
 # Compiled Object files
 
