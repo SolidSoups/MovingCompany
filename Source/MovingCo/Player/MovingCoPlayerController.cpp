@@ -45,8 +45,11 @@ void AMovingCoPlayerController::BeginPlay()
         if (!IsValid(World))
             return;
 
-        // Check if current game mode is main menu and push widget
-        if (IsValid(World->GetAuthGameMode()); World->GetAuthGameMode()->IsA<AMCO_MainMenuGameMode>())
+        auto* GameModeBase = World->GetAuthGameMode();
+        if(!IsValid(GameModeBase))
+            return;
+
+        if (GameModeBase->IsA<AMCO_MainMenuGameMode>())
         {
             if (IsValid(HUDBase))
             {
@@ -56,6 +59,7 @@ void AMovingCoPlayerController::BeginPlay()
         }
 
         // only spawn touch controls on local player controllers
+        // TODO [Elias]: Don't think we need touch controls, we should strip it out.
         if (ShouldUseTouchControls())
         {
             // spawn the mobile controls widget

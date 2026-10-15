@@ -6,11 +6,19 @@ UMCO_InteractableComponent::UMCO_InteractableComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-    SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("Interaction Overlap Zone"));
-    SphereComp->SetupAttachment(this);
-    SphereComp->InitSphereRadius(100.f);
-    // TODO: Create custom collision profile for only interactables
-    SphereComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+}
+
+void UMCO_InteractableComponent::BeginPlay(){
+    Super::BeginPlay();
+
+    if(GetOwner()->HasAuthority()){
+        SphereComp = NewObject<USphereComponent>(GetOwner(), TEXT("Interaction Zone")); 
+        SphereComp->InitSphereRadius(300.f);
+        // TODO: Create custom collision profile for only interactables
+        SphereComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+        SphereComp->SetupAttachment(this);
+        SphereComp->RegisterComponent();
+    }
 }
 
 void UMCO_InteractableComponent::InteractWith(APawn* Instigator){

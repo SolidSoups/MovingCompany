@@ -14,6 +14,8 @@ class MOVINGCO_API UMCO_InteractableComponent : public USceneComponent
 
 public:
 	UMCO_InteractableComponent();
+    virtual void BeginPlay() override;
+
 
     UFUNCTION(BlueprintCallable, Category="Interaction")
     void InteractWith(APawn* Instigator);

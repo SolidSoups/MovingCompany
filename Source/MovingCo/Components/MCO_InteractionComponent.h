@@ -18,6 +18,9 @@ public:
     void Server_DoInteraction();
 
 protected:
+    UPROPERTY(EditAnywhere, Category="Debug")
+    bool bDebug = true;
+
     UPROPERTY()
     TObjectPtr<class USphereComponent> DetectionSphere;
 
