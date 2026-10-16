@@ -1,40 +1,60 @@
 #pragma once
 
+#include "Containers/Ticker.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Containers/Ticker.h"
 #include "MCO_Door.generated.h"
 
 UCLASS()
 class MOVINGCO_API AMCO_Door : public AActor
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	AMCO_Door();
-	virtual void BeginPlay() override;
+    AMCO_Door();
+    virtual void BeginPlay() override;
     virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+    virtual void Tick(float DeltaSeconds) override;
     virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Door")
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Door")
     TObjectPtr<class UMCO_InteractableComponent> InteractableComponent;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Door")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Door")
     TObjectPtr<class UStaticMeshComponent> StaticMeshComp;
 
-    UPROPERTY(EditDefaultsOnly, Category="Door", meta=(Unit = "°/s"))
+    UPROPERTY(EditDefaultsOnly, Category = "Door", meta = (Unit = "°/s"))
     float OpenSpeed = 35.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Door", meta = (Unit = "°", ClampMin = "0.0", ClampMax = "180.0"));
+    float OpeningAngle = -90.f;
+
+    UPROPERTY(EditAnywhere, Category = "Door");
+    bool bDebug = true;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Door", meta = (ClampMin = "0.0"));
+    float SmoothingDecayRate = 1.f;
+
     // The relative yaw of the door. used to turn it open/closed
-    UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_DoorYaw)
-    float DoorYaw = 0.0f;
+    UPROPERTY(BlueprintReadOnly, Replicated)
+    float DoorYawTarget = 0.0f;
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "Door")
+    void OnDoorClosed();
+    UFUNCTION(BlueprintImplementableEvent, Category = "Door")
+    void OnDoorOpened();
 
 private:
-    // Every machine utilizes the OnReplication for DoorYaw to set the 
-    // rotation of the door. That way it will always stay synced
-    UFUNCTION()
-    void OnRep_DoorYaw();
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_DoorClosed();
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_DoorOpened();
+
+    UPROPERTY(Transient)
+    float CurrentDoorYaw = 0.0f;
+
+    float StartingYaw = 0.0f;
 
     UFUNCTION()
     void HandleOnInteractedWith(APawn* InstigatorPawn);
