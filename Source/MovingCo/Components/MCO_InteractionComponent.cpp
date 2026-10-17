@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "MCO_InteractableComponent.h"
 #include "MovingCo.h"
+#include "Subsystems/MCO_InteractablesSubsystem.h"
+#include "DrawDebugHelpers.h"
 
 UMCO_InteractionComponent::UMCO_InteractionComponent()
 {
@@ -23,67 +25,119 @@ void UMCO_InteractionComponent::BeginPlay()
     if (!GetOwner()->HasAuthority())
         return;
 
-    DetectionSphere = NewObject<USphereComponent>(GetOwner(), TEXT("Detection Sphere Comp"));
-    DetectionSphere->InitSphereRadius(200.f);
-    DetectionSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-    DetectionSphere->SetupAttachment(GetOwner()->GetRootComponent());
-    DetectionSphere->RegisterComponent();
-
-    DetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &UMCO_InteractionComponent::OnBeginOverlap);
-    DetectionSphere->OnComponentEndOverlap.AddDynamic(this, &UMCO_InteractionComponent::OnEndOverlap);
-
 #if MCO_DEBUG
-    if(bDebug){
-        SetComponentTickEnabled(true); 
+    if (bDebug)
+    {
+        SetComponentTickEnabled(true);
     }
-    else{
+    else
+    {
         SetComponentTickEnabled(false);
     }
 #endif
 }
 
 void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
-                               FActorComponentTickFunction* ThisTickFunction) {
+                                              FActorComponentTickFunction* ThisTickFunction)
+{
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 #if MCO_DEBUG
-    for(UMCO_InteractableComponent* Comp : Interactables){
-        if(!IsValid(Comp))
-            continue;
-        // Draw center
-        DrawDebugSphere(GetWorld(), Comp->GetComponentLocation(), 5.f,
-                        32, FColor::Red, false, 0.f, 0U, 0.5f);
+    if (UMCO_InteractablesSubsystem* InteractablesSS = GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>())
+    {
+        GEngine->AddOnScreenDebugMessage(19191922, 2.f, FColor::Yellow,
+                                         FString::Printf(TEXT("Interactables: %d"), 
+                                                         InteractablesSS->GetInteractables().Num()));
+
+        // Draw dot product
+        APawn* MyPawn = Cast<APawn>(GetOwner());
+        if (!MyPawn)
+            return;
+
+        APlayerController* PC = Cast<APlayerController>(MyPawn->GetController());
+        if (!PC)
+            return;
+
+        // Get camera transform
+        FVector CameraLocation, CameraDirection;
+        if (PC and PC->PlayerCameraManager)
+        {
+            CameraLocation = PC->PlayerCameraManager->GetCameraLocation();
+            CameraDirection = PC->PlayerCameraManager->GetCameraRotation().Vector();
+        }
+        else
+            return;
+
+        auto* Target = FindBestInteractable(CameraLocation, CameraDirection);
+        if (!Target)
+            return;
+
         // Draw range
-        DrawDebugSphere(GetWorld(), Comp->GetComponentLocation(), Comp->GetInteractionRadius(),
-                        32, FColor::Green, false, 0.f, 0U, 0.5f);
-    } 
+        DrawDebugSphere(GetWorld(), Target->GetComponentLocation(), Target->GetInteractionRadius(), 32, FColor::Green,
+                        false, 0.f, 0U, 0.5f);
+
+        const FVector View = (Target->GetComponentLocation() - CameraLocation);
+        const float ViewMag = View.Size();
+        const float AngleRad = FMath::Acos(MinimumInteractionAlignement);
+        const float Radius = FMath::Tan(AngleRad) * ViewMag;
+        
+        FVector Right = FVector::CrossProduct(FVector(0, 0, 1), CameraDirection).GetSafeNormal();
+        FVector Up = FVector::CrossProduct(CameraDirection, Right).GetSafeNormal();
+
+        DrawDebugCircle(
+            GetWorld(),
+            Target->GetComponentLocation(),
+            Radius,
+            32,
+            FColor::Yellow,
+            false,
+            -1.f, 0U, 0.0f,
+            Right,
+            Up,
+            false
+        );
+
+    }
 #endif
 }
 
 void UMCO_InteractionComponent::Server_DoInteraction_Implementation()
 {
     APawn* MyPawn = Cast<APawn>(GetOwner());
-    if(!MyPawn) return;
+    if (!MyPawn)
+        return;
 
     APlayerController* PC = Cast<APlayerController>(MyPawn->GetController());
-    if(!PC) return;
+    if (!PC)
+        return;
 
     // Get camera transform
     FVector CameraLocation, CameraDirection;
-    if(PC and PC->PlayerCameraManager){
-       CameraLocation = PC->PlayerCameraManager->GetCameraLocation();
+    if (PC and PC->PlayerCameraManager)
+    {
+        CameraLocation = PC->PlayerCameraManager->GetCameraLocation();
         CameraDirection = PC->PlayerCameraManager->GetCameraRotation().Vector();
     }
-    else{
+    else
+    {
         return;
     }
 
-#if MCO_DEBUG
-    if(bDebug){
-       DrawDebugLine(GetWorld(), CameraLocation, CameraLocation + CameraDirection * 500.f, FColor::Red,
-                     false, 2.0f, 0U, 0.5f); 
-    }
-#endif
+    // Find the interactable that we think the player wants to interact with
+    UMCO_InteractableComponent* Target = FindBestInteractable(CameraLocation, CameraDirection);
+    if (!Target)
+        return;
+
+    Target->InteractWith(Cast<APawn>(GetOwner()));
+}
+
+UMCO_InteractableComponent* UMCO_InteractionComponent::FindBestInteractable(const FVector CameraLocation,
+                                                                            const FVector CameraDirection) const
+{
+    UMCO_InteractablesSubsystem* InteractablesSS = GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>();
+    if (!InteractablesSS)
+        return nullptr;
+    const auto& Interactables = InteractablesSS->GetInteractables();
 
     UMCO_InteractableComponent* BestInteractable = nullptr;
     float BestAlignment = -1.f;
@@ -93,57 +147,24 @@ void UMCO_InteractionComponent::Server_DoInteraction_Implementation()
             continue;
 
         const FVector CamToInteractable = (Interactable->GetComponentLocation() - CameraLocation);
-        const float Alignment = FVector::DotProduct(CameraDirection.GetSafeNormal(), CamToInteractable.GetSafeNormal());   
-        if(Alignment > BestAlignment){
+
+        // Make sure the interactable is not far away
+        const float InteractionRadius = Interactable->GetInteractionRadius();
+        const float DistSq = CamToInteractable.SizeSquared();
+        if (DistSq >= InteractionRadius * InteractionRadius)
+            continue;
+
+        // Make sure the player is actually looking at it
+        const float Alignment = FVector::DotProduct(CameraDirection.GetSafeNormal(), CamToInteractable.GetSafeNormal());
+        if (Alignment < MinimumInteractionAlignement)
+            continue;
+
+        if (Alignment > BestAlignment)
+        {
             BestInteractable = Interactable;
             BestAlignment = Alignment;
         }
-
     }
 
-    if(!BestInteractable)
-        return;
-
-#if MCO_DEBUG
-    if(bDebug){
-       DrawDebugLine(GetWorld(), CameraLocation, BestInteractable->GetComponentLocation(), FColor::Red,
-                     false, 2.0f, 0U, 0.5f); 
-        GEngine->AddOnScreenDebugMessage(191919, 2.f, FColor::Green, 
-                                         FString::Printf(TEXT("Interactable Alignment: %.2f"), BestAlignment));
-    }
-#endif
-
-    BestInteractable->InteractWith(Cast<APawn>(GetOwner()));
-}
-
-void UMCO_InteractionComponent::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-                                               const FHitResult& SweepResult)
-{
-    if (UMCO_InteractableComponent* Interactable = OtherActor->GetComponentByClass<UMCO_InteractableComponent>())
-    {
-        Interactables.AddUnique(Interactable);
-
-#if MCO_DEBUG
-        if (bDebug){
-            GEngine->AddOnScreenDebugMessage(696969, 5.f, FColor::Green,
-                                             FString::Printf(TEXT("Interactables: %d"), Interactables.Num()));
-        }
-#endif
-    }
-}
-void UMCO_InteractionComponent::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-    if (UMCO_InteractableComponent* Interactable = OtherActor->GetComponentByClass<UMCO_InteractableComponent>())
-    {
-        Interactables.Remove(Interactable);
-
-#if MCO_DEBUG
-        if (bDebug){
-            GEngine->AddOnScreenDebugMessage(696969, 5.f, FColor::Red,
-                                             FString::Printf(TEXT("Interactables: %d"), Interactables.Num()));
-        }
-#endif
-    }
+    return BestInteractable;
 }

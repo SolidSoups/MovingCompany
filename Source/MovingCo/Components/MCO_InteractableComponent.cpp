@@ -1,24 +1,38 @@
 #include "MCO_InteractableComponent.h"
 
 #include "Components/SphereComponent.h"
+#include "MovingCo.h"
+#include "Subsystems/MCO_InteractablesSubsystem.h"
 
 UMCO_InteractableComponent::UMCO_InteractableComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
 }
 
 void UMCO_InteractableComponent::BeginPlay(){
     Super::BeginPlay();
 
-    if(GetOwner()->HasAuthority()){
-        SphereComp = NewObject<USphereComponent>(GetOwner(), TEXT("Interaction Zone")); 
-        SphereComp->InitSphereRadius(InteractionRadius);
-        // TODO: Create custom collision profile for only interactables
-        SphereComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-        SphereComp->SetupAttachment(this);
-        SphereComp->RegisterComponent();
+    auto* InteractableSS = GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>();
+    if(!InteractableSS){
+        UE_LOG(LogMovingCo, Error, TEXT("Could not get interactable subsystem"));
+        return;
     }
+    else{
+        InteractableSS->RegisterInteractable(this);
+    }
+}
+void UMCO_InteractableComponent::EndPlay(EEndPlayReason::Type EndPlayReason)
+{
+    auto* InteractableSS = GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>();
+    if(!InteractableSS){
+        UE_LOG(LogMovingCo, Error, TEXT("Could not get interactable subsystem"));
+        return;
+    }
+    else{
+        InteractableSS->UnregisterInteractable(this);
+    }
+
+    Super::EndPlay(EndPlayReason);
 }
 
 void UMCO_InteractableComponent::InteractWith(APawn* Instigator){

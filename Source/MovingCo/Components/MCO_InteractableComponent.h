@@ -15,6 +15,7 @@ class MOVINGCO_API UMCO_InteractableComponent : public USceneComponent
 public:
 	UMCO_InteractableComponent();
     virtual void BeginPlay() override;
+    virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
     UFUNCTION(BlueprintCallable, Category="Interaction")
     void InteractWith(APawn* Instigator);
@@ -22,13 +23,9 @@ public:
     UPROPERTY(BlueprintAssignable, Category="Interaction")
     FOnInteractedWith OnInteractedWith;
 
+    UFUNCTION(BlueprintPure, Category="Interactables")
     float GetInteractionRadius() const { return InteractionRadius; }
 protected:
     UPROPERTY(EditDefaultsOnly, Category="Collision")
     float InteractionRadius = 200.f;
-
-    // The player will use this InteractionComponent will this collider
-    // to find the InteractableComponent
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Collision")
-    TObjectPtr<class USphereComponent> SphereComp;
 };

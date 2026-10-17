@@ -23,18 +23,17 @@ protected:
     UPROPERTY(EditAnywhere, Category="Debug")
     bool bDebug = true;
 
-    UPROPERTY()
-    TObjectPtr<class USphereComponent> DetectionSphere;
+    UPROPERTY(EditDefaultsOnly, Category="Interaction")
+    float DetectionSphereRadius = 120.f;
 
-    UFUNCTION()
-    void OnBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor,
-                        class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-                        const struct FHitResult& SweepResult);
-    UFUNCTION()
-    void OnEndOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor,
-                      class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+    // The minimum alignment needed between the screen cursor
+    // and an interactable on screen
+    UPROPERTY(EditDefaultsOnly, Category="Interaction",
+              meta=(ClampMin="0.5", ClampMax="1.0"))
+    float MinimumInteractionAlignement = 0.90f;
 
 private:
-    // TODO: Should probably be a TWeakObjectPtr
-    TArray<class UMCO_InteractableComponent*> Interactables;
+    // Finds the best interactable that the player probably
+    // wants to interact with
+    class UMCO_InteractableComponent* FindBestInteractable(const FVector CameraLocation, const FVector CameraDirection) const;
 };
