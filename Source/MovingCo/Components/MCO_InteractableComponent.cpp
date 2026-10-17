@@ -13,7 +13,7 @@ void UMCO_InteractableComponent::BeginPlay(){
 
     if(GetOwner()->HasAuthority()){
         SphereComp = NewObject<USphereComponent>(GetOwner(), TEXT("Interaction Zone")); 
-        SphereComp->InitSphereRadius(300.f);
+        SphereComp->InitSphereRadius(InteractionRadius);
         // TODO: Create custom collision profile for only interactables
         SphereComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
         SphereComp->SetupAttachment(this);

@@ -16,13 +16,17 @@ public:
 	UMCO_InteractableComponent();
     virtual void BeginPlay() override;
 
-
     UFUNCTION(BlueprintCallable, Category="Interaction")
     void InteractWith(APawn* Instigator);
 
     UPROPERTY(BlueprintAssignable, Category="Interaction")
     FOnInteractedWith OnInteractedWith;
+
+    float GetInteractionRadius() const { return InteractionRadius; }
 protected:
+    UPROPERTY(EditDefaultsOnly, Category="Collision")
+    float InteractionRadius = 200.f;
+
     // The player will use this InteractionComponent will this collider
     // to find the InteractableComponent
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Collision")

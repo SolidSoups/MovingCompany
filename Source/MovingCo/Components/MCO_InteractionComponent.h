@@ -13,6 +13,8 @@ class MOVINGCO_API UMCO_InteractionComponent : public UActorComponent
 public:
     UMCO_InteractionComponent();
     virtual void BeginPlay() override;
+    virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
+                               FActorComponentTickFunction* ThisTickFunction) override;
 
     UFUNCTION(Server, Reliable, BlueprintCallable)
     void Server_DoInteraction();
