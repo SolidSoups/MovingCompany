@@ -2,6 +2,8 @@
 #include "Components/MCO_InteractableComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/GameStateBase.h"
+#include "Curves/CurveFloat.h"
 
 AMCO_Door::AMCO_Door()
 {
@@ -22,7 +24,7 @@ void AMCO_Door::BeginPlay()
 
     StartingYaw = StaticMeshComp->GetComponentRotation().Yaw;
 
-        if (HasAuthority())
+    if (HasAuthority())
     {
         InteractableComponent->OnInteractedWith.AddUniqueDynamic(this, &AMCO_Door::HandleOnInteractedWith);
     }
@@ -33,17 +35,15 @@ void AMCO_Door::HandleOnInteractedWith(APawn* InstigatorPawn)
     if (!HasAuthority())
         return;
 
-    // Already moving, let's getoutahere
     if (bMoving)
         return;
 
-    // Update door yaw
-    DoorYawTarget = bOpen ? OpeningAngle : 0.f;
+    const double Now = GetWorld()->GetGameState()->GetServerWorldTimeSeconds();
+    if(Now - MoveState.StartTime < MoveDuration)
+        return;
 
-    if (MovingTickHandle.IsValid())
-        FTSTicker::GetCoreTicker().RemoveTicker(MovingTickHandle);
-
-    FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateUObject(this, &AMCO_Door::TickMovingDoor, !bOpen), 0.f);
+    MoveState.bOpen = !MoveState.bOpen;
+    MoveState.StartTime = Now;
 }
 
 void AMCO_Door::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -56,62 +56,46 @@ void AMCO_Door::EndPlay(EEndPlayReason::Type EndPlayReason)
 
 void AMCO_Door::Tick(float DeltaTime)
 {
-    float Alpha = 1.f - FMath::Exp(-SmoothingDecayRate * DeltaTime);
-    CurrentDoorYaw = FMath::Lerp(CurrentDoorYaw, DoorYawTarget, Alpha);
-    StaticMeshComp->SetRelativeRotation(FRotator(0.0f, StartingYaw + CurrentDoorYaw, 0.f));
+    const AGameStateBase* GS = GetWorld()->GetGameState();
+    if(!GS)
+        return;
 
+    const double Elapsed = GS->GetServerWorldTimeSeconds() - MoveState.StartTime;
+    const double T = FMath::Clamp(Elapsed / MoveDuration, 0.0, 1.0f);
+
+    const UCurveFloat* Curve = MoveState.bOpen ? OpenCurve : CloseCurve;
+    const float Progress = Curve ? Curve->GetFloatValue(T) : T;
+    const float Yaw = OpeningAngle * (MoveState.bOpen ? Progress : 1.f - Progress);
+
+    StaticMeshComp->SetRelativeRotation(FRotator(0.0f, StartingYaw + Yaw, 0.0f));
+
+    if(MoveState.StartTime != LastSeenStartTime){
+        LastSeenStartTime = MoveState.StartTime;
+        bFXTriggered = false;
+    }
+
+    if(!bFXTriggered){
+        if(MoveState.bOpen and Progress > 0.0f){
+            OnDoorOpened();
+            bFXTriggered = true;
+        }
+        else if (!MoveState.bOpen and Progress >= 0.95f){
+            OnDoorClosed();
+            bFXTriggered = true;
+        }
+    }
+
+#if MCO_DEBUG
     if (bDebug)
     {
-        const float WireAngleRad = FMath::DegreesToRadians(DoorYawTarget);
-        const float CurrentAngleRad = FMath::DegreesToRadians(CurrentDoorYaw);
-        const float Radius = 200.f;
-
-        FVector TargetDebugLocation;
-        TargetDebugLocation.X = Radius * FMath::Cos(WireAngleRad);
-        TargetDebugLocation.Y = Radius * FMath::Sin(WireAngleRad);
-        TargetDebugLocation.Z = 0.f;
-
-        FVector CurrentDebugLocation;
-        CurrentDebugLocation.X = Radius * FMath::Cos(CurrentAngleRad);
-        CurrentDebugLocation.Y = Radius * FMath::Sin(CurrentAngleRad);
-        CurrentDebugLocation.Z = 0.f;
-
-        DrawDebugSphere(GetWorld(), GetActorLocation() + TargetDebugLocation, 5.f, 8, FColor::Red);
-        DrawDebugSphere(GetWorld(), GetActorLocation() + CurrentDebugLocation, 2.5f, 8, FColor::Green);
+        GEngine->AddOnScreenDebugMessage(121912, 2.f, FColor::Green, 
+                                         FString::Printf(TEXT("Door Progress: %.2f, Door Yaw: %.2f°"), Progress, Yaw));
     }
+#endif
 }
 
 void AMCO_Door::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(AMCO_Door, DoorYawTarget);
-}
-
-bool AMCO_Door::TickMovingDoor(float DeltaTime, bool bShouldOpen)
-{
-    float SpeedWithDir = OpenSpeed * (bShouldOpen ? -1.f : 1.f);
-    DoorYawTarget += SpeedWithDir * DeltaTime;
-
-    if (bShouldOpen and DoorYawTarget <= -90.f or !bShouldOpen and DoorYawTarget >= 0.f)
-    {
-        DoorYawTarget = bShouldOpen ? -90.f : 0.0f;
-        bOpen = bShouldOpen;
-        if (bShouldOpen)
-            Multicast_DoorOpened();
-        else
-            Multicast_DoorClosed();
-
-        return false;
-    }
-
-    return true;
-}
-
-void AMCO_Door::Multicast_DoorClosed_Implementation()
-{
-    OnDoorClosed();
-}
-void AMCO_Door::Multicast_DoorOpened_Implementation()
-{
-    OnDoorOpened();
 }
