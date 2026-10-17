@@ -7,34 +7,25 @@
 #include "GameFramework/Actor.h"
 #include "MCO_InteractableComponent.h"
 #include "MovingCo.h"
+#include "Player/MovingCoCharacter.h"
 #include "Subsystems/MCO_InteractablesSubsystem.h"
+#include "UI/MCO_CursorWidget.h"
+
+#include "Net/UnrealNetwork.h"
 
 UMCO_InteractionComponent::UMCO_InteractionComponent()
 {
-#if MCO_DEBUG
     PrimaryComponentTick.bCanEverTick = true;
-#else
-    PrimaryComponentTick.bCanEverTick = false;
-#endif
 }
 void UMCO_InteractionComponent::BeginPlay()
 {
     Super::BeginPlay();
 
     // Overlap only happens on server
-    if (!GetOwner()->HasAuthority())
-        return;
-
-#if MCO_DEBUG
-    if (bDebug)
+    if (GetOwner()->HasAuthority())
     {
         SetComponentTickEnabled(true);
     }
-    else
-    {
-        SetComponentTickEnabled(false);
-    }
-#endif
 }
 
 void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
@@ -42,55 +33,64 @@ void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick T
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-#if MCO_DEBUG
-    if (bDebug)
+    APawn* MyPawn = Cast<APawn>(GetOwner());
+    if (!MyPawn and !MyPawn->IsLocallyControlled()){
+        return;
+    }
+
+    // Get the player controller
+    APlayerController* PC = MyPawn ? Cast<APlayerController>(MyPawn->GetController()) : nullptr;
+    if (!PC)
+        return;
+
+    // Get camera transform
+    if (PC and PC->PlayerCameraManager)
     {
-        if (UMCO_InteractablesSubsystem* InteractablesSS = GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>())
+        FVector CameraLocation, CameraDirection;
+        CameraLocation = PC->PlayerCameraManager->GetCameraLocation();
+        CameraDirection = PC->PlayerCameraManager->GetCameraRotation().Vector();
+        UMCO_InteractableComponent* Target = FindBestInteractable(CameraLocation, CameraDirection);
+        const bool bNewHasTarget = Target != nullptr;
+        if (bNewHasTarget != bHasTarget)
         {
-            GEngine->AddOnScreenDebugMessage(
-                19191922, 2.f, FColor::Yellow,
-                FString::Printf(TEXT("Interactables: %d"), InteractablesSS->GetInteractables().Num()));
+            bHasTarget = bNewHasTarget;
+            UpdateCursorWidget();
+        }
 
-            // Draw dot product
-            APawn* MyPawn = Cast<APawn>(GetOwner());
-            if (!MyPawn)
-                return;
-
-            APlayerController* PC = Cast<APlayerController>(MyPawn->GetController());
-            if (!PC)
-                return;
-
-            // Get camera transform
-            FVector CameraLocation, CameraDirection;
-            if (PC and PC->PlayerCameraManager)
+#if MCO_DEBUG
+        if (bDebug)
+        {
+            if (UMCO_InteractablesSubsystem* InteractablesSS =
+                GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>())
             {
-                CameraLocation = PC->PlayerCameraManager->GetCameraLocation();
-                CameraDirection = PC->PlayerCameraManager->GetCameraRotation().Vector();
+                GEngine->AddOnScreenDebugMessage(
+                    19191922, 2.f, FColor::Yellow,
+                    FString::Printf(TEXT("Interactables: %d"), InteractablesSS->GetInteractables().Num()));
+
+                // Draw range
+                DrawDebugSphere(GetWorld(), Target->GetComponentLocation(), Target->GetInteractionRadius(), 32,
+                                FColor::Green, false, 0.f, 0U, 0.5f);
+
+                const FVector View = (Target->GetComponentLocation() - CameraLocation);
+                const float ViewMag = View.Size();
+                const float AngleRad = FMath::Acos(MinimumInteractionAlignement);
+                const float Radius = FMath::Tan(AngleRad) * ViewMag;
+
+                FVector Right = FVector::CrossProduct(FVector(0, 0, 1), CameraDirection).GetSafeNormal();
+                FVector Up = FVector::CrossProduct(CameraDirection, Right).GetSafeNormal();
+
+                DrawDebugCircle(GetWorld(), Target->GetComponentLocation(), Radius, 32, FColor::Yellow, false, -1.f,
+                                0U, 0.0f, Right, Up, false);
             }
-            else
-                return;
-
-            auto* Target = FindBestInteractable(CameraLocation, CameraDirection);
-            if (!Target)
-                return;
-
-            // Draw range
-            DrawDebugSphere(GetWorld(), Target->GetComponentLocation(), Target->GetInteractionRadius(), 32,
-                            FColor::Green, false, 0.f, 0U, 0.5f);
-
-            const FVector View = (Target->GetComponentLocation() - CameraLocation);
-            const float ViewMag = View.Size();
-            const float AngleRad = FMath::Acos(MinimumInteractionAlignement);
-            const float Radius = FMath::Tan(AngleRad) * ViewMag;
-
-            FVector Right = FVector::CrossProduct(FVector(0, 0, 1), CameraDirection).GetSafeNormal();
-            FVector Up = FVector::CrossProduct(CameraDirection, Right).GetSafeNormal();
-
-            DrawDebugCircle(GetWorld(), Target->GetComponentLocation(), Radius, 32, FColor::Yellow, false, -1.f, 0U,
-                            0.0f, Right, Up, false);
+            #endif
         }
     }
-#endif
+}
+
+void UMCO_InteractionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(UMCO_InteractionComponent, bHasTarget);
 }
 
 void UMCO_InteractionComponent::Server_DoInteraction_Implementation()
@@ -159,4 +159,15 @@ UMCO_InteractableComponent* UMCO_InteractionComponent::FindBestInteractable(cons
     }
 
     return BestInteractable;
+}
+
+void UMCO_InteractionComponent::UpdateCursorWidget()
+{
+    AMovingCoCharacter* Character = Cast<AMovingCoCharacter>(GetOwner());
+    UMCO_CursorWidget* CursorWidget = Character ? Character->GetCursorWidget() : nullptr;
+    if(!CursorWidget) return;
+
+    CursorWidget->SetMode(
+        bHasTarget ? EMCO_CursorMode::Interactable : EMCO_CursorMode::None
+    );
 }

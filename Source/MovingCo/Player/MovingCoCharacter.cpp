@@ -92,6 +92,33 @@ void AMovingCoCharacter::BeginPlay()
 
     StaminaComponent->OnStaminaFullyDrained.AddDynamic(this, &AMovingCoCharacter::HandleStaminaFullyDrained);
     GetCharacterMovement()->bEnablePhysicsInteraction = HasAuthority();
+
+}
+void AMovingCoCharacter::EndPlay(EEndPlayReason::Type EndPlayReason)
+{
+    RemoveCursorWidget();
+    Super::EndPlay(EndPlayReason);
+}
+void AMovingCoCharacter::NotifyControllerChanged()
+{
+    Super::NotifyControllerChanged();
+
+    RemoveCursorWidget();
+
+    if(!IsLocallyControlled()) return;
+
+    // Add the Cursor widget to the screen
+    auto* PC = Cast<APlayerController>(GetController());
+    if(IsValid(PC) and CursorWidgetClass){
+        CursorWidget = CreateWidget<UMCO_CursorWidget>(PC, CursorWidgetClass, NAME_None);
+        if(CursorWidget){
+            CursorWidget->AddToViewport();
+            CursorWidget->SetMode(EMCO_CursorMode::None);
+        }
+    }
+    else{
+        GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("No player controller"));
+    }
 }
 
 void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -125,6 +152,13 @@ void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     {
         UE_LOG(LogMovingCo, Error, TEXT("'%s' Failed to find an Enhanced Input Component!"), *GetNameSafe(this));
         return;
+    }
+}
+void AMovingCoCharacter::RemoveCursorWidget()
+{
+    if(CursorWidget){
+        CursorWidget->RemoveFromParent();
+        CursorWidget = nullptr;
     }
 }
 

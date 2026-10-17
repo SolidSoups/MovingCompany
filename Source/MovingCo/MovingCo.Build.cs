@@ -18,6 +18,7 @@ public class MovingCo : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
+            "Paper2D",
 			"Slate",
 			"GameplayTags",
 			"CommonUI",

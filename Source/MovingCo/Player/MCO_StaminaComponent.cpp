@@ -29,8 +29,6 @@ void UMCO_StaminaComponent::BeginPlay() {
     }
 
     if(!PC or !PC->IsLocalPlayerController()){
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
-                                         TEXT("No PC or PC isn't local player"));
         return;
     }
 

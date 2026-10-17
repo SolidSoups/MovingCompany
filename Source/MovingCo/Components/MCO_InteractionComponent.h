@@ -15,6 +15,7 @@ public:
     virtual void BeginPlay() override;
     virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
                                FActorComponentTickFunction* ThisTickFunction) override;
+    virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
     UFUNCTION(Server, Reliable, BlueprintCallable)
     void Server_DoInteraction();
@@ -32,8 +33,12 @@ protected:
               meta=(ClampMin="0.5", ClampMax="1.0"))
     float MinimumInteractionAlignement = 0.90f;
 
+
 private:
     // Finds the best interactable that the player probably
     // wants to interact with
     class UMCO_InteractableComponent* FindBestInteractable(const FVector CameraLocation, const FVector CameraDirection) const;
+
+    bool bHasTarget = false;
+    void UpdateCursorWidget();
 };
