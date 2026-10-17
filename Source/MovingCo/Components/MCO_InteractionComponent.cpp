@@ -2,12 +2,12 @@
 
 #include "Components/PrimitiveComponent.h"
 #include "Components/SphereComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Engine/HitResult.h"
 #include "GameFramework/Actor.h"
 #include "MCO_InteractableComponent.h"
 #include "MovingCo.h"
 #include "Subsystems/MCO_InteractablesSubsystem.h"
-#include "DrawDebugHelpers.h"
 
 UMCO_InteractionComponent::UMCO_InteractionComponent()
 {
@@ -43,60 +43,52 @@ void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick T
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 #if MCO_DEBUG
-    if (UMCO_InteractablesSubsystem* InteractablesSS = GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>())
+    if (bDebug)
     {
-        GEngine->AddOnScreenDebugMessage(19191922, 2.f, FColor::Yellow,
-                                         FString::Printf(TEXT("Interactables: %d"), 
-                                                         InteractablesSS->GetInteractables().Num()));
-
-        // Draw dot product
-        APawn* MyPawn = Cast<APawn>(GetOwner());
-        if (!MyPawn)
-            return;
-
-        APlayerController* PC = Cast<APlayerController>(MyPawn->GetController());
-        if (!PC)
-            return;
-
-        // Get camera transform
-        FVector CameraLocation, CameraDirection;
-        if (PC and PC->PlayerCameraManager)
+        if (UMCO_InteractablesSubsystem* InteractablesSS = GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>())
         {
-            CameraLocation = PC->PlayerCameraManager->GetCameraLocation();
-            CameraDirection = PC->PlayerCameraManager->GetCameraRotation().Vector();
+            GEngine->AddOnScreenDebugMessage(
+                19191922, 2.f, FColor::Yellow,
+                FString::Printf(TEXT("Interactables: %d"), InteractablesSS->GetInteractables().Num()));
+
+            // Draw dot product
+            APawn* MyPawn = Cast<APawn>(GetOwner());
+            if (!MyPawn)
+                return;
+
+            APlayerController* PC = Cast<APlayerController>(MyPawn->GetController());
+            if (!PC)
+                return;
+
+            // Get camera transform
+            FVector CameraLocation, CameraDirection;
+            if (PC and PC->PlayerCameraManager)
+            {
+                CameraLocation = PC->PlayerCameraManager->GetCameraLocation();
+                CameraDirection = PC->PlayerCameraManager->GetCameraRotation().Vector();
+            }
+            else
+                return;
+
+            auto* Target = FindBestInteractable(CameraLocation, CameraDirection);
+            if (!Target)
+                return;
+
+            // Draw range
+            DrawDebugSphere(GetWorld(), Target->GetComponentLocation(), Target->GetInteractionRadius(), 32,
+                            FColor::Green, false, 0.f, 0U, 0.5f);
+
+            const FVector View = (Target->GetComponentLocation() - CameraLocation);
+            const float ViewMag = View.Size();
+            const float AngleRad = FMath::Acos(MinimumInteractionAlignement);
+            const float Radius = FMath::Tan(AngleRad) * ViewMag;
+
+            FVector Right = FVector::CrossProduct(FVector(0, 0, 1), CameraDirection).GetSafeNormal();
+            FVector Up = FVector::CrossProduct(CameraDirection, Right).GetSafeNormal();
+
+            DrawDebugCircle(GetWorld(), Target->GetComponentLocation(), Radius, 32, FColor::Yellow, false, -1.f, 0U,
+                            0.0f, Right, Up, false);
         }
-        else
-            return;
-
-        auto* Target = FindBestInteractable(CameraLocation, CameraDirection);
-        if (!Target)
-            return;
-
-        // Draw range
-        DrawDebugSphere(GetWorld(), Target->GetComponentLocation(), Target->GetInteractionRadius(), 32, FColor::Green,
-                        false, 0.f, 0U, 0.5f);
-
-        const FVector View = (Target->GetComponentLocation() - CameraLocation);
-        const float ViewMag = View.Size();
-        const float AngleRad = FMath::Acos(MinimumInteractionAlignement);
-        const float Radius = FMath::Tan(AngleRad) * ViewMag;
-        
-        FVector Right = FVector::CrossProduct(FVector(0, 0, 1), CameraDirection).GetSafeNormal();
-        FVector Up = FVector::CrossProduct(CameraDirection, Right).GetSafeNormal();
-
-        DrawDebugCircle(
-            GetWorld(),
-            Target->GetComponentLocation(),
-            Radius,
-            32,
-            FColor::Yellow,
-            false,
-            -1.f, 0U, 0.0f,
-            Right,
-            Up,
-            false
-        );
-
     }
 #endif
 }
