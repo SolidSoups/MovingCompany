@@ -11,9 +11,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputActionValue.h"
 #include "MCO_StaminaComponent.h"
+#include "MCO_StressComponent.h"
 #include "MovingCo.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Stealth/MCO_VisionConeComponent.h"
+#include "Stealth/MCO_WatcherAIController.h"
 
 AMovingCoCharacter::AMovingCoCharacter()
 {
@@ -54,6 +57,18 @@ AMovingCoCharacter::AMovingCoCharacter()
     PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("Physics Handle"));
 
     StaminaComponent = CreateDefaultSubobject<UMCO_StaminaComponent>(TEXT("Stamina Component"));
+
+    StressComponent = CreateDefaultSubobject<UMCO_StressComponent>(TEXT("Stress Component"));
+
+    PanicVisionCone = CreateDefaultSubobject<UMCO_VisionConeComponent>(TEXT("Panic Vision Cone"));
+    PanicVisionCone->SetupAttachment(GetCapsuleComponent());
+    PanicVisionCone->SetRelativeLocation(FVector(0.f, 0.f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() + 2.f));
+    PanicVisionCone->bStartActive = false;
+    PanicVisionCone->ViewDistance = 900.f;
+    PanicVisionCone->ViewHalfAngle = 45.f;
+    PanicVisionCone->ConeColor = FLinearColor(1.f, 0.45f, 0.f);
+
+    PanicControllerClass = AMCO_PanickedCowAIController::StaticClass();
 }
 void AMovingCoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -91,6 +106,7 @@ void AMovingCoCharacter::BeginPlay()
     Super::BeginPlay();
 
     StaminaComponent->OnStaminaFullyDrained.AddDynamic(this, &AMovingCoCharacter::HandleStaminaFullyDrained);
+    StressComponent->OnPanicChanged.AddDynamic(this, &AMovingCoCharacter::HandlePanicChanged);
     GetCharacterMovement()->bEnablePhysicsInteraction = HasAuthority();
 
 }
@@ -230,7 +246,7 @@ void AMovingCoCharacter::DoEndCrouch()
 
 void AMovingCoCharacter::Server_StartHolding_Implementation()
 {
-    if (bStaggered)
+    if (bStaggered or StressComponent->IsPanicking())
         return;
 
     // Trace to see if there is furniture in front of us
@@ -245,7 +261,8 @@ void AMovingCoCharacter::Server_StartHolding_Implementation()
         return;
     }
 
-    if (!Cast<AMCO_FurnitureBase>(Hit.GetActor()))
+    AMCO_FurnitureBase* Furniture = Cast<AMCO_FurnitureBase>(Hit.GetActor());
+    if (!Furniture)
         return;
 
     bLifting = bIsCrouched;
@@ -266,11 +283,19 @@ void AMovingCoCharacter::Server_StartHolding_Implementation()
         SpeedScale *= DragSpeedMultiplier;
     SetHoldSpeedScale(SpeedScale);
 
+    // Anything this bumps into is on us now
+    Furniture->AddHolder(this);
+    HeldFurniture = Furniture;
+
     bHolding = true;
 }
 
 void AMovingCoCharacter::Server_StopHolding_Implementation()
 {
+    if (HeldFurniture.IsValid())
+        HeldFurniture->RemoveHolder(this);
+    HeldFurniture = nullptr;
+
     PhysicsHandle->ReleaseComponent();
     SetHoldSpeedScale(1.0f);
 
@@ -319,4 +344,49 @@ void AMovingCoCharacter::HandleStaminaFullyDrained()
 void AMovingCoCharacter::EndStagger()
 {
     bStaggered = false;
+}
+
+void AMovingCoCharacter::HandlePanicChanged(bool bPanicking)
+{
+    if (!HasAuthority())
+        return;
+
+    PanicVisionCone->SetConeActive(bPanicking);
+
+    if (bPanicking)
+    {
+        if (bHolding)
+            Server_StopHolding();
+        UnCrouch();
+
+        // Hand the cow over to the AI, the player keeps watching through its eyes
+        APlayerController* PC = GetController<APlayerController>();
+        if (!PC or !PanicControllerClass)
+            return;
+
+        PanickedPlayer = PC;
+        PC->UnPossess();
+
+        FActorSpawnParameters Params;
+        Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        PanicController = GetWorld()->SpawnActor<AAIController>(PanicControllerClass, GetActorLocation(),
+                                                                GetActorRotation(), Params);
+        if (PanicController)
+            PanicController->Possess(this);
+
+        PC->SetViewTarget(this);
+    }
+    else
+    {
+        if (PanicController)
+        {
+            PanicController->UnPossess();
+            PanicController->Destroy();
+            PanicController = nullptr;
+        }
+
+        if (APlayerController* PC = PanickedPlayer.Get())
+            PC->Possess(this);
+        PanickedPlayer = nullptr;
+    }
 }

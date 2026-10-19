@@ -16,6 +16,10 @@ class UPhysicsHandleComponent;
 struct FInputActionValue;
 
 class UMCO_StaminaComponent;
+class UMCO_StressComponent;
+class UMCO_VisionConeComponent;
+class AMCO_FurnitureBase;
+class AAIController;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -40,6 +44,13 @@ class AMovingCoCharacter : public ACharacter
 
     UPROPERTY(VisibleAnywhere, Category="Components", meta = (AllowPrivateAccess = "true"))
     UMCO_StaminaComponent* StaminaComponent;
+
+    UPROPERTY(VisibleAnywhere, Category="Components", meta = (AllowPrivateAccess = "true"))
+    UMCO_StressComponent* StressComponent;
+
+    /** Only shown while panicking, when this cow is an NPC looking for the other movers */
+    UPROPERTY(VisibleAnywhere, Category="Components", meta = (AllowPrivateAccess = "true"))
+    UMCO_VisionConeComponent* PanicVisionCone;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category="UI")
@@ -139,6 +150,21 @@ protected:
     bool bStaggered = false;
     FTimerHandle StaggerTimer;
     void EndStagger();
+
+    /** AI that takes over the cow while it panics */
+    UPROPERTY(EditDefaultsOnly, Category="Stress")
+    TSubclassOf<AAIController> PanicControllerClass;
+
+    UFUNCTION()
+    void HandlePanicChanged(bool bPanicking);
+
+    TWeakObjectPtr<AMCO_FurnitureBase> HeldFurniture;
+
+    /** The player that lost control of us, gets it back once we calm down */
+    TWeakObjectPtr<APlayerController> PanickedPlayer;
+
+    UPROPERTY()
+    TObjectPtr<AAIController> PanicController;
 
 protected:
     virtual void BeginPlay() override;
