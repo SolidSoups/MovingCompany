@@ -20,7 +20,8 @@ IOnlineSessionPtr UMCO_SessionSubsystem::GetSessionInterface() const
     return Subsystem->GetSessionInterface();
 }
 
-void UMCO_SessionSubsystem::HostSession(){
+void UMCO_SessionSubsystem::HostSession()
+{
     IOnlineSessionPtr Session = GetSessionInterface();
     if(!Session.IsValid()){
         UE_LOG(LogMovingCo, Warning, TEXT("HostSession: no session interface"));

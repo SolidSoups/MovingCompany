@@ -129,37 +129,3 @@ void AMovingCoPlayerController::JoinGame()
 {
     GetGameInstance()->GetSubsystem<UMCO_SessionSubsystem>()->FindAndJoinSession();
 }
-
-// Prototyping graveyard.
-
-// void AMovingCoPlayerController::DoPush(){
-//     FVector ViewLocation;
-//     FRotator ViewRotation;
-//     GetPlayerViewPoint(ViewLocation, ViewRotation);
-//
-//     const FVector Direction = ViewRotation.Vector();
-//     const FVector TraceEnd = ViewLocation + Direction * PushRange;
-//
-//     // Ignore our own pawn. The camera sits inside its capsule
-//     const FCollisionQueryParams Params(SCENE_QUERY_STAT(PushTrace), false, GetPawn());
-//
-//     FHitResult Hit;
-//     bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, ViewLocation, TraceEnd, ECC_Visibility, Params);
-//
-//     if(bHit){
-//         DrawDebugLine(GetWorld(), ViewLocation + FVector(0.0, 0.0, -100.0), Hit.Location, FColor::Green, false, 1.f,
-//         0U, 1.f);
-//     }
-//     else{
-//         return;
-//     }
-//
-//     if(AMCO_DestructibleActor* Structure = Cast<AMCO_DestructibleActor>(Hit.GetActor())){
-//         Structure->ApplyRadialImpact(Hit.ImpactPoint, PushRadius, Direction, PushStrength);
-//     }
-// }
-// void AMovingCoPlayerController::DoReset() {
-//     for(TActorIterator<AMCO_DestructibleActor> It(GetWorld()); It; ++It){
-//         It->Reset();
-//     }
-// }

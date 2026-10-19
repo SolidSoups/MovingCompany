@@ -12,7 +12,9 @@ class MOVINGCO_API UMCO_SessionSubsystem : public UGameInstanceSubsystem {
     GENERATED_BODY()
 
 public:
+    UFUNCTION(BlueprintCallable, Category="Sessions")
     void HostSession();
+    UFUNCTION(BlueprintCallable, Category="Sessions")
     void FindAndJoinSession();
 
 private:
