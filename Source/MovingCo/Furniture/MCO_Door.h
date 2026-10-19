@@ -22,9 +22,12 @@ class MOVINGCO_API AMCO_Door : public AActor
     GENERATED_BODY()
 
 public:
-    AMCO_Door();
+    AMCO_Door(const FObjectInitializer& ObjectInitializer);
+    virtual void OnConstruction(const FTransform& Transform) override;
     virtual void BeginPlay() override;
     virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+    static const FName DoorSceneCompName;
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Door")
@@ -34,7 +37,9 @@ protected:
     TObjectPtr<class USceneComponent> SceneRootComp;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Door")
-    TObjectPtr<class UStaticMeshComponent> DoorMeshComp;
+    TObjectPtr<class USceneComponent> DoorSceneComp;
+
+
 
     // Called when we want to close the door
     UFUNCTION(BlueprintImplementableEvent, Category = "Door")

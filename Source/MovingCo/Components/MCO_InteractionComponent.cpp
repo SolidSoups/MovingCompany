@@ -34,7 +34,8 @@ void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick T
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     APawn* MyPawn = Cast<APawn>(GetOwner());
-    if (!MyPawn and !MyPawn->IsLocallyControlled()){
+    if (!MyPawn and !MyPawn->IsLocallyControlled())
+    {
         return;
     }
 
@@ -60,13 +61,15 @@ void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick T
 #if MCO_DEBUG
         if (bDebug)
         {
-            if (UMCO_InteractablesSubsystem* InteractablesSS =
-                GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>())
+            if (UMCO_InteractablesSubsystem* InteractablesSS = GetWorld()->GetSubsystem<UMCO_InteractablesSubsystem>())
             {
                 GEngine->AddOnScreenDebugMessage(
                     19191922, 2.f, FColor::Yellow,
                     FString::Printf(TEXT("Interactables: %d"), InteractablesSS->GetInteractables().Num()));
+            }
 
+            if (Target)
+            {
                 // Draw range
                 DrawDebugSphere(GetWorld(), Target->GetComponentLocation(), Target->GetInteractionRadius(), 32,
                                 FColor::Green, false, 0.f, 0U, 0.5f);
@@ -79,10 +82,10 @@ void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick T
                 FVector Right = FVector::CrossProduct(FVector(0, 0, 1), CameraDirection).GetSafeNormal();
                 FVector Up = FVector::CrossProduct(CameraDirection, Right).GetSafeNormal();
 
-                DrawDebugCircle(GetWorld(), Target->GetComponentLocation(), Radius, 32, FColor::Yellow, false, -1.f,
-                                0U, 0.0f, Right, Up, false);
+                DrawDebugCircle(GetWorld(), Target->GetComponentLocation(), Radius, 32, FColor::Yellow, false, -1.f, 0U,
+                                0.0f, Right, Up, false);
             }
-            #endif
+#endif
         }
     }
 }
@@ -165,9 +168,8 @@ void UMCO_InteractionComponent::UpdateCursorWidget()
 {
     AMovingCoCharacter* Character = Cast<AMovingCoCharacter>(GetOwner());
     UMCO_CursorWidget* CursorWidget = Character ? Character->GetCursorWidget() : nullptr;
-    if(!CursorWidget) return;
+    if (!CursorWidget)
+        return;
 
-    CursorWidget->SetMode(
-        bHasTarget ? EMCO_CursorMode::Interactable : EMCO_CursorMode::None
-    );
+    CursorWidget->SetMode(bHasTarget ? EMCO_CursorMode::Interactable : EMCO_CursorMode::None);
 }

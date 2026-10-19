@@ -3,8 +3,12 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/GameStateBase.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/SceneComponent.h"
 
-AMCO_Door::AMCO_Door()
+const FName AMCO_Door::DoorSceneCompName(TEXT("Door Scene Component"));
+
+AMCO_Door::AMCO_Door(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
 {
     PrimaryActorTick.bCanEverTick = true;
     bReplicates = true;
@@ -12,12 +16,17 @@ AMCO_Door::AMCO_Door()
     SceneRootComp = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Root"));
     SetRootComponent(SceneRootComp);
 
-    DoorMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Door Static Mesh"));
-    DoorMeshComp->SetMobility(EComponentMobility::Movable);
-    DoorMeshComp->SetupAttachment(SceneRootComp);
+    DoorSceneComp = CreateDefaultSubobject<USceneComponent, UStaticMeshComponent>(DoorSceneCompName);
+    DoorSceneComp->SetMobility(EComponentMobility::Movable);
+    DoorSceneComp->SetupAttachment(SceneRootComp);
 
     InteractableComponent = CreateDefaultSubobject<UMCO_InteractableComponent>(TEXT("Interactable Scene Component"));
-    InteractableComponent->SetupAttachment(DoorMeshComp);
+    InteractableComponent->SetupAttachment(DoorSceneComp);
+}
+
+void AMCO_Door::OnConstruction(const FTransform& Transform)
+{
+
 }
 
 void AMCO_Door::BeginPlay()

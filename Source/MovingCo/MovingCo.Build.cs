@@ -22,8 +22,10 @@ public class MovingCo : ModuleRules
 			"Slate",
 			"GameplayTags",
 			"CommonUI",
-			"CommonInput"
+			"CommonInput",
+            "GeometryCache"
 		});
+
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
             "OnlineSubsystem",
