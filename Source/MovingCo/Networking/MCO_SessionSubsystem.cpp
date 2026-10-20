@@ -65,7 +65,7 @@ void UMCO_SessionSubsystem::OnCreateSessionComplete(FName SessionName, bool bWas
     }
 
     UE_LOG(LogMovingCo, Log, TEXT("HostSession: lobby created, opening map as listen server"));
-    UGameplayStatics::OpenLevel(GetGameInstance(), FName(TEXT("/Game/Developers/elima/Prototypes/LVL_Prototype_CrouchBox")), true, TEXT("listen"));
+    UGameplayStatics::OpenLevel(GetGameInstance(), FName(TEXT("/Game/Levels/Prototype/CIty_Test_1")), true, TEXT("listen"));
 }
 
 void UMCO_SessionSubsystem::FindAndJoinSession(){

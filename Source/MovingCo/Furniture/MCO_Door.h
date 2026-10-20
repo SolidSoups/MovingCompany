@@ -5,6 +5,8 @@
 #include "GameFramework/Actor.h"
 #include "MCO_Door.generated.h"
 
+class UMCO_ObjectiveUserWidget;
+
 USTRUCT(BlueprintType)
 struct FMCO_MoveState
 {
@@ -25,7 +27,13 @@ public:
     AMCO_Door(const FObjectInitializer& ObjectInitializer);
     virtual void OnConstruction(const FTransform& Transform) override;
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+    virtual void Tick(float DeltaSeconds) override;
     virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+    /** Removes the highlight and the objective text for good, e.g. once the objective is complete */
+    UFUNCTION(BlueprintCallable, Category="Door|Objective")
+    void ClearObjective();
 
     static const FName DoorSceneCompName;
 
@@ -39,7 +47,28 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Door")
     TObjectPtr<class USceneComponent> DoorSceneComp;
 
+    /** Marks this door as the objective: it shows through walls until the local player first gets close, with a hint on screen */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Door|Objective")
+    bool bIsObjective = false;
 
+    /** Overlay drawn on the door's meshes. Use a translucent unlit material with Disable Depth Test ticked so it shows through walls */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Door|Objective", meta=(EditCondition="bIsObjective"))
+    TObjectPtr<class UMaterialInterface> HighlightMaterial;
+
+    /** The highlight goes away for good once the local player is this close to the door */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Door|Objective", meta=(EditCondition="bIsObjective", ClampMin="0", Units="cm"))
+    float HighlightRevealDistance = 500.f;
+
+    /** Explains how to complete the objective. Leave empty for no text overlay */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Door|Objective", meta=(EditCondition="bIsObjective", MultiLine="true"))
+    FText ObjectiveText;
+
+    UPROPERTY(EditAnywhere, Category="Door|Objective", meta=(EditCondition="bIsObjective"))
+    TSubclassOf<UMCO_ObjectiveUserWidget> ObjectiveWidgetClass;
+
+    // Called the first time the local player gets within HighlightRevealDistance
+    UFUNCTION(BlueprintImplementableEvent, Category="Door|Objective")
+    void OnObjectiveReached();
 
     // Called when we want to close the door
     UFUNCTION(BlueprintImplementableEvent, Category = "Door")
@@ -56,4 +85,14 @@ private:
 
     UFUNCTION()
     void HandleOnInteractedWith(APawn* InstigatorPawn);
+
+    void UpdateObjective();
+    void SetHighlighted(bool bHighlighted);
+
+    UPROPERTY()
+    TObjectPtr<UMCO_ObjectiveUserWidget> ObjectiveWidget;
+
+    // Local only, every client reaches the door on its own
+    bool bObjectiveReached = false;
+    bool bObjectiveCleared = false;
 };
