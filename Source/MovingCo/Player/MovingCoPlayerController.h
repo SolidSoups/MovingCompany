@@ -88,6 +88,7 @@ protected:
 	bool ShouldUseTouchControls() const;
 
 	/** Returns the HUD as an AMCO_HUDBase, caching it once it exists */
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AMCO_HUDBase* GetHUDBase();
 
     // /** Traces from the camera and applies an impact to any destructible it hits */
