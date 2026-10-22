@@ -24,7 +24,7 @@ UCLASS()
 class MOVINGCO_API UMCO_WidgetStackManager : public UCommonUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual bool Initialize() override;
 
@@ -35,14 +35,16 @@ public:
 	void PopWidgetFromLayerStack(FGameplayTag LayerTag);
 
 private:
-	UPROPERTY(meta=(BindWidget))
+	FMCO_WidgetStackInfo* FindLayer(FGameplayTag LayerTag);
+
+	UPROPERTY()
+	TObjectPtr<UCommonActivatableWidgetStack> GameStack;
+
+	UPROPERTY()
 	TObjectPtr<UCommonActivatableWidgetStack> MenuStack;
 
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY()
 	TObjectPtr<UCommonActivatableWidgetStack> PopupStack;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UCommonActivatableWidgetStack> GameStack;
 
 	UPROPERTY()
 	TArray<FMCO_WidgetStackInfo> WidgetStacks;

@@ -31,16 +31,6 @@ void AMovingCoPlayerController::BeginPlay()
 
     if (IsLocalController())
     {
-        HUDBase = Cast<AMCO_HUDBase>(MyHUD);
-        if (IsValid(HUDBase))
-        {
-            HUDBase->Initialize();
-        }
-        else
-        {
-            UE_LOG(LogMovingCo, Error, TEXT("Cast to HUDBase failed!"));
-        }
-
         auto World = GetWorld();
         if (!IsValid(World))
             return;
@@ -51,11 +41,19 @@ void AMovingCoPlayerController::BeginPlay()
 
         if (GameModeBase->IsA<AMCO_MainMenuGameMode>())
         {
-            if (IsValid(HUDBase))
+            if (!MainMenuWidgetClass)
             {
-                HUDBase->PushWidgetToLayerStack(UMCO_GameplayTagSubsystem::Tags.UILayerTag_Menu, MainMenuWidgetClass);
+                UE_LOG(LogMovingCo, Error, TEXT("MainMenuWidgetClass is not set on %s!"), *GetName());
+            }
+
+            // The HUD creates its own widget stack manager; pushing initialises it if it hasn't yet
+            if (AMCO_HUDBase* HUD = GetHUDBase())
+            {
+                HUD->PushWidgetToLayerStack(UMCO_GameplayTagSubsystem::Tags.UILayerTag_Menu, MainMenuWidgetClass);
                 return;
             }
+
+            UE_LOG(LogMovingCo, Error, TEXT("Cast to HUDBase failed!"));
         }
 
         // only spawn touch controls on local player controllers
@@ -118,6 +116,17 @@ bool AMovingCoPlayerController::ShouldUseTouchControls() const
 {
     // are we on a mobile platform? Should we force touch?
     return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
+}
+
+AMCO_HUDBase* AMovingCoPlayerController::GetHUDBase()
+{
+    // MyHUD can arrive after BeginPlay on network clients (ClientSetHUD), so resolve lazily
+    if (!IsValid(HUDBase))
+    {
+        HUDBase = Cast<AMCO_HUDBase>(GetHUD());
+    }
+
+    return HUDBase;
 }
 
 void AMovingCoPlayerController::HostGame()
