@@ -12,7 +12,7 @@ UCLASS()
 class MOVINGCO_API AMCO_HUDBase : public AHUD
 {
 	GENERATED_BODY()
-	
+
 public:
 	void Initialize();
 
@@ -25,6 +25,13 @@ public:
 	{
 		return Cast<TWidgetClass>(PushWidgetToLayerStack(LayerTag, TWidgetClass::StaticClass()));
 	}
+	
+	UFUNCTION(BlueprintCallable, Category="HUD", meta=(Categories="UI.Layer"))
+	void PopWidgetFromLayerStack(FGameplayTag LayerTag);
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	UPROPERTY()

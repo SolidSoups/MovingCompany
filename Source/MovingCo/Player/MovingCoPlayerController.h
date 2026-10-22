@@ -87,6 +87,9 @@ protected:
 	/** Returns true if the player should use UMG touch controls */
 	bool ShouldUseTouchControls() const;
 
+	/** Returns the HUD as an AMCO_HUDBase, caching it once it exists */
+	AMCO_HUDBase* GetHUDBase();
+
     // /** Traces from the camera and applies an impact to any destructible it hits */
     // void DoPush();
     //
