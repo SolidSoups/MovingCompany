@@ -17,10 +17,37 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-    UPROPERTY(VisibleAnywhere, Category="_Furniture")
+    UPROPERTY(VisibleAnywhere, Category="Furniture")
     class UStaticMeshComponent* Mesh;
 
+    // The impact speed of a very small bump
+    UPROPERTY(EditDefaultsOnly, Category="Furniture|Impact")
+    float MinImpactSpeed = 100.f;
 
-public:
-	virtual void Tick(float DeltaTime) override;
+    // The impact speed of a very large bump
+    UPROPERTY(EditDefaultsOnly, Category="Furniture|Impact")
+    float MaxImpactSpeed = 600.f;
+
+    // The delay between impacts
+    UPROPERTY(EditDefaultsOnly, Category="Furniture|Impact")
+    double ImpactDelay = 0.35f;
+
+    // Broadcast when the blueprint needs arrange FX for an impact
+    UFUNCTION(BlueprintImplementableEvent, Category="Furniture|Impact")
+    void PlayImpactFX(const FVector& Location, float IntensityNorm);
+
+private:
+    UFUNCTION(NetMulticast, Unreliable)
+    void Multicast_PlayImpactFX(FVector_NetQuantize Location, float IntensityNorm);
+
+    // Detects hits on mesh for damage + fx playback
+    UFUNCTION()
+    void OnMeshHit(
+        UPrimitiveComponent* HitComponent,
+        AActor* OtherActor,
+        UPrimitiveComponent* OtherComp,
+        FVector NormalImpulse,
+        const FHitResult& Hit );
+
+    double LastImpactTime = 0.0f;
 };
