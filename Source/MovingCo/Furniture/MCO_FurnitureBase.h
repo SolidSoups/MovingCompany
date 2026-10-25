@@ -20,6 +20,9 @@ protected:
     UPROPERTY(VisibleAnywhere, Category="Furniture")
     class UStaticMeshComponent* Mesh;
 
+    UPROPERTY(VisibleAnywhere, Category="Furniture")
+    TObjectPtr<class UMCO_ItemValueComponent> ItemValueComponent;
+
     // The impact speed of a very small bump
     UPROPERTY(EditDefaultsOnly, Category="Furniture|Impact")
     float MinImpactSpeed = 100.f;

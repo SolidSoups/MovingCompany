@@ -2,6 +2,7 @@
 
 #include "Components/StaticMeshComponent.h"
 #include "Player/MovingCoCharacter.h"
+#include "Components/MCO_ItemValueComponent.h"
 
 AMCO_FurnitureBase::AMCO_FurnitureBase()
 {
@@ -12,9 +13,11 @@ AMCO_FurnitureBase::AMCO_FurnitureBase()
     Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
     Mesh->SetMobility(EComponentMobility::Movable);
     Mesh->SetCollisionProfileName(FName("PhysicsActor"));
-    // Mesh->SetIsReplicated(true);
+    Mesh->SetNotifyRigidBodyCollision(true);
     Mesh->BodyInstance.SetMassOverride(500.0f);
     RootComponent = Mesh;
+
+    ItemValueComponent = CreateDefaultSubobject<UMCO_ItemValueComponent>(TEXT("ItemValueComponent"));
 }
 
 void AMCO_FurnitureBase::BeginPlay()
@@ -66,6 +69,8 @@ void AMCO_FurnitureBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* Ot
     Multicast_PlayImpactFX(Location, NormalImpulse, DamageIntensity);
    
     // Apply damage to the furniture here  
+    // Please make sure only to bind to the dynamic events on the blueprint side.
+    ItemValueComponent->DamageValuable(DamageIntensity * 100.f, Location);
 }
 
 void AMCO_FurnitureBase::Multicast_PlayImpactFX_Implementation(FVector_NetQuantize10 Location,
