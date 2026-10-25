@@ -56,21 +56,24 @@ void AMCO_FurnitureBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* Ot
     const FVector Location = Hit.ImpactPoint.IsZero() 
         ? GetActorLocation() 
         : FVector(Hit.ImpactPoint);
-    const float Intensity = FMath::GetMappedRangeValueClamped(
+    const float DamageIntensity = FMath::GetMappedRangeValueClamped(
         FVector2D(MinImpactSpeed, MaxImpactSpeed),
         FVector2D(0.0f, 1.0f),
         ImpactSpeed
     );
 
     // NetMulticast here!
-    Multicast_PlayImpactFX(Location, Intensity);
+    Multicast_PlayImpactFX(Location, NormalImpulse, DamageIntensity);
    
     // Apply damage to the furniture here  
 }
 
-void AMCO_FurnitureBase::Multicast_PlayImpactFX_Implementation(FVector_NetQuantize Location, float IntensityNorm){
+void AMCO_FurnitureBase::Multicast_PlayImpactFX_Implementation(FVector_NetQuantize10 Location,
+                                                               FVector_NetQuantize10 NormalImpulse,
+                                                               float IntensityNorm)
+{
     if(GetNetMode() == NM_DedicatedServer)
         return;
 
-    PlayImpactFX(FVector(Location), IntensityNorm);
+    PlayImpactFX(FVector(Location), FVector(NormalImpulse), IntensityNorm);
 }

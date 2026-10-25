@@ -34,11 +34,13 @@ protected:
 
     // Broadcast when the blueprint needs arrange FX for an impact
     UFUNCTION(BlueprintImplementableEvent, Category="Furniture|Impact")
-    void PlayImpactFX(const FVector& Location, float IntensityNorm);
+    void PlayImpactFX(const FVector& Location, const FVector& NormalImpulse, float IntensityNorm);
 
 private:
     UFUNCTION(NetMulticast, Unreliable)
-    void Multicast_PlayImpactFX(FVector_NetQuantize Location, float IntensityNorm);
+    void Multicast_PlayImpactFX(FVector_NetQuantize10 Location,
+                                FVector_NetQuantize10 NormalImpulse,
+                                float IntensityNorm);
 
     // Detects hits on mesh for damage + fx playback
     UFUNCTION()
