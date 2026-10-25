@@ -12,8 +12,8 @@
 #include "InputActionValue.h"
 #include "MCO_StaminaComponent.h"
 #include "MovingCo.h"
-#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 
 AMovingCoCharacter::AMovingCoCharacter()
 {
@@ -55,18 +55,21 @@ AMovingCoCharacter::AMovingCoCharacter()
 
     StaminaComponent = CreateDefaultSubobject<UMCO_StaminaComponent>(TEXT("Stamina Component"));
 }
+
 void AMovingCoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(AMovingCoCharacter, HoldSpeedScale);
     DOREPLIFETIME(AMovingCoCharacter, bHolding);
 }
+
 void AMovingCoCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
 {
     Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
     FirstPersonMesh->AddRelativeLocation(FVector(0.f, 0.f, -HalfHeightAdjust));
 }
+
 void AMovingCoCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
 {
     Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
@@ -92,7 +95,6 @@ void AMovingCoCharacter::BeginPlay()
 
     StaminaComponent->OnStaminaFullyDrained.AddDynamic(this, &AMovingCoCharacter::HandleStaminaFullyDrained);
     GetCharacterMovement()->bEnablePhysicsInteraction = HasAuthority();
-
 }
 void AMovingCoCharacter::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
@@ -105,18 +107,22 @@ void AMovingCoCharacter::NotifyControllerChanged()
 
     RemoveCursorWidget();
 
-    if(!IsLocallyControlled()) return;
+    if (!IsLocallyControlled())
+        return;
 
     // Add the Cursor widget to the screen
     auto* PC = Cast<APlayerController>(GetController());
-    if(IsValid(PC) and CursorWidgetClass){
+    if (IsValid(PC) and CursorWidgetClass)
+    {
         CursorWidget = CreateWidget<UMCO_CursorWidget>(PC, CursorWidgetClass, NAME_None);
-        if(CursorWidget){
+        if (CursorWidget)
+        {
             CursorWidget->AddToViewport();
             CursorWidget->SetMode(EMCO_CursorMode::None);
         }
     }
-    else{
+    else
+    {
         GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("No player controller"));
     }
 }
@@ -145,8 +151,10 @@ void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
                                            &AMovingCoCharacter::LookInput);
 
         // SetupPlayerInputComponent is only called on the local client, so this will ONLY ever resolve into an RPC
-        EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Started, this, &AMovingCoCharacter::Server_StartHolding);
-        EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Completed, this, &AMovingCoCharacter::Server_StopHolding);
+        EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Started, this,
+                                           &AMovingCoCharacter::Server_StartHolding);
+        EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Completed, this,
+                                           &AMovingCoCharacter::Server_StopHolding);
     }
     else
     {
@@ -156,7 +164,8 @@ void AMovingCoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 }
 void AMovingCoCharacter::RemoveCursorWidget()
 {
-    if(CursorWidget){
+    if (CursorWidget)
+    {
         CursorWidget->RemoveFromParent();
         CursorWidget = nullptr;
     }
@@ -299,21 +308,24 @@ void AMovingCoCharacter::SetHoldSpeedScale(float Scale)
 }
 void AMovingCoCharacter::HandleStaminaFullyDrained()
 {
-    UPrimitiveComponent* Dropped = PhysicsHandle->GetGrabbedComponent();
+    return;
+    // Disabled
 
-    Server_StopHolding();
-
-    if (Dropped)
-    {
-        const FVector Fumble = GetActorForwardVector() * 150.f + FVector(0.f, 0.f, -300.f);
-        Dropped->AddImpulse(Fumble, NAME_None, true);
-        Dropped->AddAngularImpulseInDegrees(FMath::VRand() * 180.f, NAME_None, true);
-    }
-
-    GetCharacterMovement()->StopMovementImmediately();
-
-    bStaggered = true;
-    GetWorldTimerManager().SetTimer(StaggerTimer, this, &AMovingCoCharacter::EndStagger, StaggerDuration);
+    // UPrimitiveComponent* Dropped = PhysicsHandle->GetGrabbedComponent();
+    //
+    // Server_StopHolding();
+    //
+    // if (Dropped)
+    // {
+    //     const FVector Fumble = GetActorForwardVector() * 150.f + FVector(0.f, 0.f, -300.f);
+    //     Dropped->AddImpulse(Fumble, NAME_None, true);
+    //     Dropped->AddAngularImpulseInDegrees(FMath::VRand() * 180.f, NAME_None, true);
+    // }
+    //
+    // GetCharacterMovement()->StopMovementImmediately();
+    //
+    // bStaggered = true;
+    // GetWorldTimerManager().SetTimer(StaggerTimer, this, &AMovingCoCharacter::EndStagger, StaggerDuration);
 }
 
 void AMovingCoCharacter::EndStagger()
