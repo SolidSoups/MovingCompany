@@ -6,7 +6,8 @@
 
 AMCO_FurnitureBase::AMCO_FurnitureBase()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bStartWithTickEnabled = false;
     bReplicates = true;
     SetReplicateMovement(true);
 
@@ -31,27 +32,43 @@ void AMCO_FurnitureBase::BeginPlay()
         Mesh->OnComponentHit.AddDynamic(this, &AMCO_FurnitureBase::OnMeshHit);
 
         LastImpactTime = 0.0f;
+
+        SetActorTickEnabled(true);
     }
 }
+
+void AMCO_FurnitureBase::Tick(float DeltaTime)
+{
+    // Tick only runs on server to track furniture velocity
+    LastVelocity = Mesh->GetPhysicsLinearVelocity();
+}
+
 void AMCO_FurnitureBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                                    UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    // Ignore collisions with player
-    if(Cast<AMovingCoCharacter>(OtherActor))
-        return;
-
     // Ensure that impacts aren't recorded TOO often
     const float Now = GetWorld()->GetTimeSeconds();
     if(Now - LastImpactTime < ImpactDelay)
         return;
     LastImpactTime = Now;
 
-    // Calculate impact speed
-    const float ImpactSize = NormalImpulse.Size();
-    const float ImpactSpeed = ImpactSize / FMath::Max(Mesh->GetMass(), 1.0f); 
+    // Resolve the velocity of the other object
+    FVector OtherVelocity = FVector::ZeroVector;
+    if(auto* OtherFurniture = Cast<AMCO_FurnitureBase>(OtherActor)){
+        OtherVelocity = OtherFurniture->GetLastVelocity();
+    }
+    else if(auto* OtherPlayer = Cast<AMovingCoCharacter>(OtherActor)){
+        OtherVelocity = OtherPlayer->GetVelocity();
+    }
+
+    // Project the summed velocity onto the impact normal. This gives
+    // us the accumulated speed of the impact.
+    FVector SumVelocity = LastVelocity - OtherVelocity;
+    FVector ProjectedVelocity = SumVelocity.ProjectOnTo(Hit.ImpactNormal);
+    const float ImpactVelocity = ProjectedVelocity.Size();
 
     // Ensure impact is violent enough
-    if(ImpactSpeed < MinImpactSpeed)
+    if(ImpactVelocity < MinImpactSpeed)
         return;
 
     // We need the location and intensity for this sound to play,
@@ -62,7 +79,7 @@ void AMCO_FurnitureBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* Ot
     const float DamageIntensity = FMath::GetMappedRangeValueClamped(
         FVector2D(MinImpactSpeed, MaxImpactSpeed),
         FVector2D(0.0f, 1.0f),
-        ImpactSpeed
+        ImpactVelocity
     );
 
     // NetMulticast here!

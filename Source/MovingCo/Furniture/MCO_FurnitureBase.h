@@ -14,8 +14,11 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Objective")
     bool bIsScorable = false;
+
+    FVector GetLastVelocity() const { return LastVelocity; }
 protected:
 	virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
 
     UPROPERTY(VisibleAnywhere, Category="Furniture")
     class UStaticMeshComponent* Mesh;
@@ -54,5 +57,11 @@ private:
         FVector NormalImpulse,
         const FHitResult& Hit );
 
+    // Track the last time this furniture was impacted,
+    // to avoid LOTS of small impacts. 
     double LastImpactTime = 0.0f;
+
+    // The last known velocity of this object, before any forces where applied.
+    // Useful for physics calculations in Mesh hit callbacks.
+    FVector LastVelocity;
 };

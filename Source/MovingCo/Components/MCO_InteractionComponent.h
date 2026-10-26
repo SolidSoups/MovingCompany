@@ -39,6 +39,8 @@ private:
     // wants to interact with
     class UMCO_InteractableComponent* FindBestInteractable(const FVector CameraLocation, const FVector CameraDirection) const;
 
+    UPROPERTY(Replicated)
     bool bHasTarget = false;
+
     void UpdateCursorWidget();
 };
