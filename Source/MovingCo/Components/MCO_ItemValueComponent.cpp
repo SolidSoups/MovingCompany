@@ -5,6 +5,7 @@
 UMCO_ItemValueComponent::UMCO_ItemValueComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+    SetIsReplicatedByDefault(true);
 }
 
 void UMCO_ItemValueComponent::BeginPlay()
