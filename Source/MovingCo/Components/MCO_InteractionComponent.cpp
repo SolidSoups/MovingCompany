@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "Engine/HitResult.h"
 #include "Events/MCO_EventSubsystem.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
 #include "MCO_InteractableComponent.h"
@@ -16,6 +17,11 @@
 UMCO_InteractionComponent::UMCO_InteractionComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UMCO_InteractionComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(UMCO_InteractionComponent, bHasTarget);
 }
 void UMCO_InteractionComponent::BeginPlay()
 {
