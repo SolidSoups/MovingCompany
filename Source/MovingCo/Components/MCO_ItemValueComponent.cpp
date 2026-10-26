@@ -34,7 +34,7 @@ void UMCO_ItemValueComponent::DamageValuable(float Damage, const FVector &Locati
 }
 
 void UMCO_ItemValueComponent::Multicast_OnValuableDamaged_Implementation(float Damage, const FVector_NetQuantize10 &Location){
-    if(UMCO_EventSubsystem* EventSS = GetWorld()->GetSubsystem<UMCO_EventSubsystem>()){
-        EventSS->NativeEvents_AllMachines.OnValuableDamagedDelegate.Broadcast(Damage, Location);
-    }       
+    if(UMCO_EventSubsystem* EventSS = UMCO_EventSubsystem::Get(this)){
+        EventSS->GetAllEvents()->OnValuableDamaged.Broadcast(Damage, Location);
+    }
 }

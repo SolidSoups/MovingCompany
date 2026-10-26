@@ -19,5 +19,6 @@ public:
     const TArray<UMCO_InteractableComponent*>& GetInteractables() const { return Interactables; }
 
 private:
+    UPROPERTY()
     TArray<UMCO_InteractableComponent*> Interactables;
 };

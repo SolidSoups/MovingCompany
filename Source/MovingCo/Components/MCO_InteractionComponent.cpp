@@ -1,17 +1,17 @@
 #include "MCO_InteractionComponent.h"
 
+#include "Camera/PlayerCameraManager.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/SphereComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/Engine.h"
 #include "Engine/HitResult.h"
+#include "Events/MCO_EventSubsystem.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/PlayerController.h"
 #include "MCO_InteractableComponent.h"
 #include "MovingCo.h"
-#include "Player/MovingCoCharacter.h"
 #include "Subsystems/MCO_InteractablesSubsystem.h"
-#include "UI/MCO_CursorWidget.h"
-
-#include "Net/UnrealNetwork.h"
 
 UMCO_InteractionComponent::UMCO_InteractionComponent()
 {
@@ -55,7 +55,7 @@ void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick T
         if (bNewHasTarget != bHasTarget)
         {
             bHasTarget = bNewHasTarget;
-            UpdateCursorWidget();
+            BroadcastTargetChanged(Target);
         }
 
 #if MCO_DEBUG
@@ -88,12 +88,6 @@ void UMCO_InteractionComponent::TickComponent(float DeltaTime, enum ELevelTick T
 #endif
         }
     }
-}
-
-void UMCO_InteractionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    DOREPLIFETIME(UMCO_InteractionComponent, bHasTarget);
 }
 
 void UMCO_InteractionComponent::Server_DoInteraction_Implementation()
@@ -164,12 +158,10 @@ UMCO_InteractableComponent* UMCO_InteractionComponent::FindBestInteractable(cons
     return BestInteractable;
 }
 
-void UMCO_InteractionComponent::UpdateCursorWidget()
+void UMCO_InteractionComponent::BroadcastTargetChanged(UMCO_InteractableComponent* Target)
 {
-    AMovingCoCharacter* Character = Cast<AMovingCoCharacter>(GetOwner());
-    UMCO_CursorWidget* CursorWidget = Character ? Character->GetCursorWidget() : nullptr;
-    if (!CursorWidget)
-        return;
-
-    CursorWidget->SetMode(bHasTarget ? EMCO_CursorMode::Interactable : EMCO_CursorMode::None);
+    if (UMCO_EventSubsystem* EventSS = UMCO_EventSubsystem::Get(this))
+    {
+        EventSS->GetLocalEvents()->OnInteractionTargetChanged.Broadcast(Cast<APawn>(GetOwner()), Target);
+    }
 }

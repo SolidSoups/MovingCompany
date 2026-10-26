@@ -5,23 +5,34 @@
 #include "MCO_Events.h"
 #include "MCO_EventSubsystem.generated.h"
 
-// Manages events local to this machine.
-// Please make sure only to bind to the dynamic events on the blueprint side.
 UCLASS()
 class MOVINGCO_API UMCO_EventSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
+    static UMCO_EventSubsystem* Get(const UObject* WorldContextObject);
+
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-    UPROPERTY()
-    FMCO_Native_EventsAllMachines NativeEvents_AllMachines;
-    UPROPERTY(BlueprintReadWrite, Category="Events")
-    TObjectPtr<UMCO_Blueprint_EventsAllMachines> DynamicEvents_AllMachines;
+    UFUNCTION(BlueprintPure, Category="Events")
+    UMCO_AllEvents* GetAllEvents() const { return AllEvents; }
+
+    // Returns null on clients, as server events can only be used on the server.
+    UFUNCTION(BlueprintPure, Category="Events")
+    UMCO_ServerEvents* GetServerEvents() const;
+
+    UFUNCTION(BlueprintPure, Category="Events")
+    UMCO_LocalEvents* GetLocalEvents() const { return LocalEvents; }
+
+protected:
+    virtual bool DoesSupportWorldType(const EWorldType::Type WorldType) const override;
 
 private:
-    void SetupBlueprintAllEvents();
-    void SetupBlueprintLocalEvents();
-    void SetupBlueprintServerEvents();
+    UPROPERTY()
+    TObjectPtr<UMCO_AllEvents> AllEvents;
+    UPROPERTY()
+    TObjectPtr<UMCO_ServerEvents> ServerEvents;
+    UPROPERTY()
+    TObjectPtr<UMCO_LocalEvents> LocalEvents;
 };

@@ -28,7 +28,11 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
     void TrySetImage(UPaperSprite* Sprite);
+
+    UFUNCTION()
+    void HandleInteractionTargetChanged(APawn* Interactor, class UMCO_InteractableComponent* NewTarget);
 
     UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
     TObjectPtr<class UImage> CursorImage;
