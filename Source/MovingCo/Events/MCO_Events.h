@@ -1,30 +1,43 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/Object.h"
 #include "MCO_Delegates.h"
 #include "MCO_Events.generated.h"
 
-// All-events for native c++.
-USTRUCT()
-struct FMCO_Native_EventsAllMachines {
-    GENERATED_BODY() 
+// NOTE [Elias]: These need to be classes so that blueprint passes by reference instead of copying.
 
-    // Called when a valuable (such as a furniture) loses monetary value, usually from damage.
-    // Also provided is the location the damage stemmed from.
-    FMCO_OnValuableDamagedNativeSignature OnValuableDamagedDelegate;
-};
-
-// All-events for blueprint.
-// All-events are events that apply to all machines, like cosmetics.
-// NOTE [Elias]: This needs to be a class so that blueprint passes by value instead of copying.
-UCLASS()
-class UMCO_Blueprint_EventsAllMachines : public UObject {
+// NetMulti-events called by both host and clients
+UCLASS(BlueprintType)
+class MOVINGCO_API UMCO_AllEvents : public UObject {
     GENERATED_BODY()
 
 public:
-
     // Called when a valuable (such as a furniture) loses monetary value, usually from damage.
     // Also provided is the location the damage stemmed from.
-    UPROPERTY(BlueprintAssignable) 
-    FMCO_OnValuableDamagedDynamicSignature OnValuableDamagedDelegate;
+    UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Events")
+    FMCO_OnValuableDamagedSignature OnValuableDamaged;
+};
+
+// Server-events only exist on the server.
+UCLASS(BlueprintType)
+class MOVINGCO_API UMCO_ServerEvents : public UObject {
+    GENERATED_BODY()
+
+public:
+    // Called when a pawn has interacted with an interactable.
+    UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Events")
+    FMCO_OnInteractedSignature OnInteracted;
+};
+
+// Local-events.
+UCLASS(BlueprintType)
+class MOVINGCO_API UMCO_LocalEvents : public UObject {
+    GENERATED_BODY()
+
+public:
+    // Called when a locally controlled pawn starts or stops looking at an interactable.
+    // NewTarget is null when the pawn no longer has a target.
+    UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Events")
+    FMCO_OnInteractionTargetChangedSignature OnInteractionTargetChanged;
 };

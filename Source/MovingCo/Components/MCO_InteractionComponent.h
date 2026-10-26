@@ -15,7 +15,6 @@ public:
     virtual void BeginPlay() override;
     virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
                                FActorComponentTickFunction* ThisTickFunction) override;
-    virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
     UFUNCTION(Server, Reliable, BlueprintCallable)
     void Server_DoInteraction();
@@ -41,6 +40,5 @@ private:
 
     UPROPERTY(Replicated)
     bool bHasTarget = false;
-
-    void UpdateCursorWidget();
+    void BroadcastTargetChanged(class UMCO_InteractableComponent* Target);
 };

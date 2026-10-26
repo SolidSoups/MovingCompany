@@ -1,34 +1,35 @@
 #include "MCO_EventSubsystem.h"
 
+#include "Engine/Engine.h"
+#include "Engine/World.h"
+
+UMCO_EventSubsystem* UMCO_EventSubsystem::Get(const UObject* WorldContextObject)
+{
+    const UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull) : nullptr;
+    return World ? World->GetSubsystem<UMCO_EventSubsystem>() : nullptr;
+}
+
 void UMCO_EventSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
 
-    // The blueprint events classes have to be created during runtime
-    // as they are UObjects
-    if(!IsValid(DynamicEvents_AllMachines)) 
-        DynamicEvents_AllMachines = NewObject<UMCO_Blueprint_EventsAllMachines>();
-    
-    // Bind all cpp native events to the blueprint equivelents
-    SetupBlueprintAllEvents();
-    SetupBlueprintLocalEvents();
-    if(GetWorld()->GetNetMode() != NM_Client){
-        // These events are only needed on the server
-        SetupBlueprintServerEvents();
-    }
+    // The event classes have to be created during runtime as they are UObjects
+    AllEvents = NewObject<UMCO_AllEvents>(this);
+    ServerEvents = NewObject<UMCO_ServerEvents>(this);
+    LocalEvents = NewObject<UMCO_LocalEvents>(this);
 }
 
+UMCO_ServerEvents* UMCO_EventSubsystem::GetServerEvents() const
+{
+    // The net mode is checked on access, as it is not reliable yet during Initialize
+    const UWorld* World = GetWorld();
+    if(!World || World->GetNetMode() == NM_Client)
+        return nullptr;
 
-void UMCO_EventSubsystem::SetupBlueprintAllEvents(){
-    // Forward broadcasts from the native events to the dynamic events
+    return ServerEvents;
+}
 
-    NativeEvents_AllMachines.OnValuableDamagedDelegate.AddLambda([this](float ValueDamage, const FVector& Location){ DynamicEvents_AllMachines->OnValuableDamagedDelegate.Broadcast(ValueDamage, Location); });
-}
-void UMCO_EventSubsystem::SetupBlueprintLocalEvents(){
-    // Forward broadcasts from the native events to the dynamic events
-    
-}
-void UMCO_EventSubsystem::SetupBlueprintServerEvents(){
-    // Forward broadcasts from the native events to the dynamic events
-    
+bool UMCO_EventSubsystem::DoesSupportWorldType(const EWorldType::Type WorldType) const
+{
+    return WorldType == EWorldType::Game || WorldType == EWorldType::PIE;
 }

@@ -4,6 +4,17 @@
 #include "Delegates/DelegateCombinations.h"
 #include "MCO_Delegates.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FMCO_OnValuableDamagedNativeSignature, float /* ValueDamage */, const FVector& /* Location */);
+class APawn;
+class UMCO_InteractableComponent;
+
+// All events
 UDELEGATE()
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMCO_OnValuableDamagedDynamicSignature, float, ValueDamage, const FVector&, Location);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMCO_OnValuableDamagedSignature, float, ValueDamage, const FVector&, Location);
+
+// Server events
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMCO_OnInteractedSignature, APawn*, Instigator, UMCO_InteractableComponent*, Interactable);
+
+// Local events
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMCO_OnInteractionTargetChangedSignature, APawn*, Interactor, UMCO_InteractableComponent*, NewTarget);
