@@ -6,11 +6,21 @@
 #include "GameFramework/PlayerController.h"
 #include "MovingCoPlayerController.generated.h"
 
+class UMCO_PlayerHUDBase;
 class UMCO_MainMenuWidget;
 class AMCO_HUDBase;
 class UInputMappingContext;
 class UUserWidget;
 class UInputAction;
+
+/** Input modes applied through the CommonUI action router */
+UENUM(BlueprintType)
+enum class EMCO_InputMode : uint8
+{
+	Game,
+	UI,
+	GameAndUI
+};
 
 /**
  *  Simple first person Player Controller
@@ -35,6 +45,10 @@ public:
 	UFUNCTION(Exec)
 	void JoinGame();
 
+	/** Sets the input mode on the CommonUI action router, which owns input routing (plain SetInputMode is ignored by it) */
+	UFUNCTION(BlueprintCallable, Category="Input")
+	void SetMCOInputMode(EMCO_InputMode Mode);
+
 protected:
     UPROPERTY(EditAnywhere, Category="Push")
     float PushRange = 5000.0f;
@@ -58,10 +72,13 @@ protected:
 	TSubclassOf<UUserWidget> MobileControlsWidgetClass;
 
 	/** Main menu widget class*/
-	UPROPERTY(EditAnywhere, Category="MainMenu")
+	UPROPERTY(EditAnywhere, Category="UI|MainMenu")
 	TSubclassOf<UMCO_MainMenuWidget> MainMenuWidgetClass;
 	
-	UPROPERTY(BlueprintReadOnly, Category="HUD")
+	UPROPERTY(EditAnywhere, Category="UI|HUD")
+	TSubclassOf<UMCO_PlayerHUDBase> PlayerHUDClass;
+	
+	UPROPERTY(BlueprintReadOnly, Category="UI|HUD")
 	TObjectPtr<AMCO_HUDBase> HUDBase;
 	
 	/** Pointer to the mobile controls widget */

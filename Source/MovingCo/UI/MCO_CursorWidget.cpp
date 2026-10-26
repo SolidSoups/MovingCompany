@@ -6,6 +6,8 @@
 void UMCO_CursorWidget::NativeConstruct()
 {
     Super::NativeConstruct();
+    
+    SetMode(EMCO_CursorMode::None);
 
     if(UMCO_EventSubsystem* EventSS = UMCO_EventSubsystem::Get(this)){
         EventSS->GetLocalEvents()->OnInteractionTargetChanged.AddUniqueDynamic(this, &UMCO_CursorWidget::HandleInteractionTargetChanged);

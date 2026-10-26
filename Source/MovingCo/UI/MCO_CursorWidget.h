@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "CommonUserWidget.h"
 #include "MCO_CursorWidget.generated.h"
 
 USTRUCT(BlueprintType)
@@ -19,7 +19,7 @@ enum class EMCO_CursorMode : uint8 {
 };
 
 UCLASS()
-class MOVINGCO_API UMCO_CursorWidget : public UUserWidget
+class MOVINGCO_API UMCO_CursorWidget : public UCommonUserWidget
 {
 	GENERATED_BODY()
 
