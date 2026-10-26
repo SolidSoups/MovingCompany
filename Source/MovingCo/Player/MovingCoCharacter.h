@@ -42,10 +42,7 @@ class AMovingCoCharacter : public ACharacter
     UMCO_StaminaComponent* StaminaComponent;
 
 protected:
-    UPROPERTY(EditDefaultsOnly, Category="UI")
-    TSubclassOf<class UMCO_CursorWidget> CursorWidgetClass;
-
-	/** Jump Input Action */
+    /** Jump Input Action */
 	UPROPERTY(EditAnywhere, Category ="Input")
 	UInputAction* JumpAction;
 
@@ -157,17 +154,10 @@ public:
 	/** Returns first person camera component **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
-    UFUNCTION(BlueprintCallable, Category="UI") 
-    UMCO_CursorWidget* GetCursorWidget() const { return CursorWidget; }
-
 private:
     UFUNCTION()
     void OnRep_HoldSpeedScale() {
         SetHoldSpeedScale(HoldSpeedScale);
     }
-
-    void RemoveCursorWidget();
-    UPROPERTY()
-    TObjectPtr<UMCO_CursorWidget> CursorWidget;
 };
 
