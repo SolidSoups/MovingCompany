@@ -31,7 +31,9 @@ void UMCO_ItemValueComponent::DamageValuable(float Damage, const FVector &Locati
     CurrentValue -= Damage;
     Multicast_OnValuableDamaged(Damage, Location);
 
-    // if (CurrentValue <= 0.0f) Destroy!
+    if (CurrentValue <= 0.0f){
+        OnValueDepleted.Broadcast();
+    }
 }
 
 void UMCO_ItemValueComponent::Multicast_OnValuableDamaged_Implementation(float Damage, const FVector_NetQuantize10 &Location){
@@ -39,3 +41,4 @@ void UMCO_ItemValueComponent::Multicast_OnValuableDamaged_Implementation(float D
         EventSS->GetAllEvents()->OnValuableDamaged.Broadcast(Damage, Location);
     }
 }
+

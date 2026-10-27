@@ -11,6 +11,7 @@ class MOVINGCO_API AMCO_PropBase : public AActor
 
 public:
 	AMCO_PropBase();
+    virtual void TornOff() override;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Objective")
     bool bIsScorable = false;
@@ -42,11 +43,17 @@ protected:
     UFUNCTION(BlueprintImplementableEvent, Category="Furniture|Impact")
     void PlayImpactFX(const FVector& Location, const FVector& NormalImpulse, float IntensityNorm);
 
+    UFUNCTION(BlueprintImplementableEvent, Category="Furniture|Impact")
+    void PlayDestroyFX();
+
 private:
     UFUNCTION(NetMulticast, Unreliable)
     void Multicast_PlayImpactFX(FVector_NetQuantize10 Location,
                                 FVector_NetQuantize10 NormalImpulse,
                                 float IntensityNorm);
+
+    UFUNCTION()
+    void HandleOnValueDepleted();
 
     // Detects hits on mesh for damage + fx playback
     UFUNCTION()

@@ -27,13 +27,15 @@ void AMCO_PropBase::BeginPlay()
     SetPhysicsReplicationMode(EPhysicsReplicationMode::PredictiveInterpolation);
     
     if(HasAuthority()){
+        SetActorTickEnabled(true);
+        LastImpactTime = 0.0f;
+
+        // Setup mesh for physics
         Mesh->SetSimulatePhysics(true);
         Mesh->SetNotifyRigidBodyCollision(true);
         Mesh->OnComponentHit.AddDynamic(this, &AMCO_PropBase::OnMeshHit);
 
-        LastImpactTime = 0.0f;
-
-        SetActorTickEnabled(true);
+        ItemValueComponent->OnValueDepleted.AddUObject(this, &AMCO_PropBase::HandleOnValueDepleted);
     }
 }
 
@@ -43,8 +45,33 @@ void AMCO_PropBase::Tick(float DeltaTime)
     LastVelocity = Mesh->GetPhysicsLinearVelocity();
 }
 
-void AMCO_PropBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-                                   UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void AMCO_PropBase::HandleOnValueDepleted()
+{
+    // 'TearOff' detaches this actor from networking. Every actor
+    // then is the 'Authority' for this actor. An actor knows it was 'Torn off' 
+    // through the overridable 'TornOff' function.
+    TearOff();
+    ForceNetUpdate(); // send 'TearOff' flag this frame, don't wait for NetUpdateFrequency
+    
+    if(GetNetMode() != NM_DedicatedServer) PlayDestroyFX();
+
+    // Hide the actor now, and Destroy it in a little while
+    // to give the forced net update some time. Too early
+    // and the client's copy gets destroyed before playing fx.
+    SetActorHiddenInGame(true);
+    SetActorEnableCollision(false);
+    SetLifeSpan(1.0f);
+}
+
+void AMCO_PropBase::TornOff()
+{
+    Super::TornOff();
+    PlayDestroyFX();
+    Destroy();
+}
+
+void AMCO_PropBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+                              FVector NormalImpulse, const FHitResult& Hit)
 {
     // Ensure that impacts aren't recorded TOO often
     const float Now = GetWorld()->GetTimeSeconds();
