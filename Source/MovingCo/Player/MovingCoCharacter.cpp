@@ -1,19 +1,21 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MovingCoCharacter.h"
+
+#include "EnhancedInputComponent.h"
+#include "InputActionValue.h"
+#include "Engine/World.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Engine/World.h"
-#include "EnhancedInputComponent.h"
-#include "Furniture/MCO_FurnitureBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "InputActionValue.h"
-#include "MCO_StaminaComponent.h"
-#include "MovingCo.h"
-#include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Net/UnrealNetwork.h"
+
+#include "Player/MCO_StaminaComponent.h"
+#include "Actors/MCO_PropBase.h"
+#include "MovingCo.h"
 
 AMovingCoCharacter::AMovingCoCharacter()
 {
@@ -224,7 +226,7 @@ void AMovingCoCharacter::Server_StartHolding_Implementation()
         return;
     }
 
-    if (!Cast<AMCO_FurnitureBase>(Hit.GetActor()))
+    if (!Cast<AMCO_PropBase>(Hit.GetActor()))
         return;
 
     bLifting = bIsCrouched;

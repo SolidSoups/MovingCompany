@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MCO_FurnitureBase.generated.h"
+#include "MCO_PropBase.generated.h"
 
 UCLASS()
-class MOVINGCO_API AMCO_FurnitureBase : public AActor
+class MOVINGCO_API AMCO_PropBase : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	AMCO_FurnitureBase();
+	AMCO_PropBase();
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Objective")
     bool bIsScorable = false;

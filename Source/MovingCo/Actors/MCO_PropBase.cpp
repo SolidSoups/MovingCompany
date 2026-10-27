@@ -1,10 +1,10 @@
-#include "MCO_FurnitureBase.h"
+#include "MCO_PropBase.h"
 
 #include "Components/StaticMeshComponent.h"
 #include "Player/MovingCoCharacter.h"
 #include "Components/MCO_ItemValueComponent.h"
 
-AMCO_FurnitureBase::AMCO_FurnitureBase()
+AMCO_PropBase::AMCO_PropBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
     PrimaryActorTick.bStartWithTickEnabled = false;
@@ -21,7 +21,7 @@ AMCO_FurnitureBase::AMCO_FurnitureBase()
     ItemValueComponent = CreateDefaultSubobject<UMCO_ItemValueComponent>(TEXT("ItemValueComponent"));
 }
 
-void AMCO_FurnitureBase::BeginPlay()
+void AMCO_PropBase::BeginPlay()
 {
 	Super::BeginPlay();
     SetPhysicsReplicationMode(EPhysicsReplicationMode::PredictiveInterpolation);
@@ -29,7 +29,7 @@ void AMCO_FurnitureBase::BeginPlay()
     if(HasAuthority()){
         Mesh->SetSimulatePhysics(true);
         Mesh->SetNotifyRigidBodyCollision(true);
-        Mesh->OnComponentHit.AddDynamic(this, &AMCO_FurnitureBase::OnMeshHit);
+        Mesh->OnComponentHit.AddDynamic(this, &AMCO_PropBase::OnMeshHit);
 
         LastImpactTime = 0.0f;
 
@@ -37,13 +37,13 @@ void AMCO_FurnitureBase::BeginPlay()
     }
 }
 
-void AMCO_FurnitureBase::Tick(float DeltaTime)
+void AMCO_PropBase::Tick(float DeltaTime)
 {
     // Tick only runs on server to track furniture velocity
     LastVelocity = Mesh->GetPhysicsLinearVelocity();
 }
 
-void AMCO_FurnitureBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+void AMCO_PropBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                                    UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
     // Ensure that impacts aren't recorded TOO often
@@ -54,7 +54,7 @@ void AMCO_FurnitureBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* Ot
 
     // Resolve the velocity of the other object
     FVector OtherVelocity = FVector::ZeroVector;
-    if(auto* OtherFurniture = Cast<AMCO_FurnitureBase>(OtherActor)){
+    if(auto* OtherFurniture = Cast<AMCO_PropBase>(OtherActor)){
         OtherVelocity = OtherFurniture->GetLastVelocity();
     }
     else if(auto* OtherPlayer = Cast<AMovingCoCharacter>(OtherActor)){
@@ -90,7 +90,7 @@ void AMCO_FurnitureBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* Ot
     ItemValueComponent->DamageValuable(DamageIntensity * 100.f, Location);
 }
 
-void AMCO_FurnitureBase::Multicast_PlayImpactFX_Implementation(FVector_NetQuantize10 Location,
+void AMCO_PropBase::Multicast_PlayImpactFX_Implementation(FVector_NetQuantize10 Location,
                                                                FVector_NetQuantize10 NormalImpulse,
                                                                float IntensityNorm)
 {
