@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "MCO_ItemValueComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FMCO_OnValuableDepletedSignature);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class MOVINGCO_API UMCO_ItemValueComponent : public UActorComponent
 {
@@ -19,6 +21,8 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Valued Items")
     void DamageValuable(float Damage, const FVector& Location);
 
+    // Called when the value has depleted past or equal to zero. [Server only]
+    FMCO_OnValuableDepletedSignature OnValueDepleted;
 protected:
 	virtual void BeginPlay() override;
 

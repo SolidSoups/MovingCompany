@@ -5,7 +5,7 @@
 #include "MCO_Delegates.h"
 #include "MCO_Events.generated.h"
 
-// NOTE [Elias]: These need to be classes so that blueprint passes by reference instead of copying.
+// NOTE: These need to be classes so that blueprint passes by reference instead of copying.
 
 // NetMulti-events called by both host and clients
 UCLASS(BlueprintType)
