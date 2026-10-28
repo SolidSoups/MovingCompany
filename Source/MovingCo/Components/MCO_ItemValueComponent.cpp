@@ -28,9 +28,9 @@ void UMCO_ItemValueComponent::DamageValuable(float Damage, const FVector &Locati
     if(!GetOwner()->HasAuthority())
         return;
 
-    CurrentValue -= Damage;
     Multicast_OnValuableDamaged(Damage, Location);
 
+    CurrentValue -= Damage;
     if (CurrentValue <= 0.0f){
         OnValueDepleted.Broadcast();
     }

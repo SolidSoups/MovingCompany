@@ -1,8 +1,10 @@
 #include "MCO_PropBase.h"
 
+#include "Net/UnrealNetwork.h"
 #include "Components/StaticMeshComponent.h"
-#include "Player/MovingCoCharacter.h"
+
 #include "Components/MCO_ItemValueComponent.h"
+#include "Player/MovingCoCharacter.h"
 
 AMCO_PropBase::AMCO_PropBase()
 {
@@ -19,6 +21,11 @@ AMCO_PropBase::AMCO_PropBase()
     RootComponent = Mesh;
 
     ItemValueComponent = CreateDefaultSubobject<UMCO_ItemValueComponent>(TEXT("ItemValueComponent"));
+}
+void AMCO_PropBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AMCO_PropBase, bIsDepleted);
 }
 
 void AMCO_PropBase::BeginPlay()
@@ -41,7 +48,7 @@ void AMCO_PropBase::BeginPlay()
 
 void AMCO_PropBase::Tick(float DeltaTime)
 {
-    // Tick only runs on server to track furniture velocity
+    // Tick only runs on server to track prop velocity
     LastVelocity = Mesh->GetPhysicsLinearVelocity();
 }
 
@@ -50,11 +57,11 @@ void AMCO_PropBase::HandleOnValueDepleted()
     // 'TearOff' detaches this actor from networking. Every actor
     // then is the 'Authority' for this actor. An actor knows it was 'Torn off' 
     // through the overridable 'TornOff' function.
+    bIsDepleted = true;
     TearOff();
     ForceNetUpdate(); // send 'TearOff' flag this frame, don't wait for NetUpdateFrequency
     
     if(GetNetMode() != NM_DedicatedServer) PlayDestroyFX();
-
     // Hide the actor now, and Destroy it in a little while
     // to give the forced net update some time. Too early
     // and the client's copy gets destroyed before playing fx.
@@ -66,7 +73,6 @@ void AMCO_PropBase::HandleOnValueDepleted()
 void AMCO_PropBase::TornOff()
 {
     Super::TornOff();
-    PlayDestroyFX();
     Destroy();
 }
 
@@ -81,8 +87,8 @@ void AMCO_PropBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 
     // Resolve the velocity of the other object
     FVector OtherVelocity = FVector::ZeroVector;
-    if(auto* OtherFurniture = Cast<AMCO_PropBase>(OtherActor)){
-        OtherVelocity = OtherFurniture->GetLastVelocity();
+    if(auto* OtherProp = Cast<AMCO_PropBase>(OtherActor)){
+        OtherVelocity = OtherProp->GetLastVelocity();
     }
     else if(auto* OtherPlayer = Cast<AMovingCoCharacter>(OtherActor)){
         OtherVelocity = OtherPlayer->GetVelocity();
@@ -111,10 +117,17 @@ void AMCO_PropBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 
     // NetMulticast here!
     Multicast_PlayImpactFX(Location, NormalImpulse, DamageIntensity);
-   
-    // Apply damage to the furniture here  
+
+    // Apply damage to the prop here  
     // Please make sure only to bind to the dynamic events on the blueprint side.
     ItemValueComponent->DamageValuable(DamageIntensity * 100.f, Location);
+}
+
+void AMCO_PropBase::OnRep_bIsDepleted()
+{
+    SetActorHiddenInGame(true);
+    SetActorEnableCollision(false);
+    PlayDestroyFX();
 }
 
 void AMCO_PropBase::Multicast_PlayImpactFX_Implementation(FVector_NetQuantize10 Location,
