@@ -11,6 +11,10 @@ UMCO_ItemValueComponent::UMCO_ItemValueComponent()
 void UMCO_ItemValueComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+    if(GetOwner()->HasAuthority()){
+        CurrentValue = DefaultValue;
+    }
 }
 
 void UMCO_ItemValueComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

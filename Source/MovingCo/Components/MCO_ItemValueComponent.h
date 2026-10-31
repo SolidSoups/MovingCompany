@@ -23,6 +23,10 @@ public:
 
     // Called when the value has depleted past or equal to zero. [Server only]
     FMCO_OnValuableDepletedSignature OnValueDepleted;
+
+    // The default value of the object
+    UPROPERTY(EditAnywhere, Category="Item Value")
+    float DefaultValue = 100.f;
 protected:
 	virtual void BeginPlay() override;
 
