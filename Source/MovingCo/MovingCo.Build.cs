@@ -23,7 +23,10 @@ public class MovingCo : ModuleRules
 			"GameplayTags",
 			"CommonUI",
 			"CommonInput",
-            "GeometryCache"
+            "GeometryCache",
+            "DeveloperSettings",
+            "Niagara",
+            "NiagaraTextToolkit"
 		});
 
 
