@@ -1,0 +1,3 @@
+[submodule "Plugins/NiagaraTextToolkit"]
+	path = Plugins/NiagaraTextToolkit
+	url = https://github.com/LucianTranc/NiagaraTextToolkit.git
